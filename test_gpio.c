@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	int fd;
     if (!bcm2835_init()) return 1;
 	
-    #define PIN RW
+    #define PIN RESET
 
  	bcm2835_gpio_fsel(PIN, BCM2835_GPIO_FSEL_OUTP);
  	while (1) {
