@@ -1,12 +1,13 @@
 #include <bcm2835.h>
 #include "pins.h"
 #include "c011.h"
+#include <stdio.h>
 
 //all the C011 timings are <1uS (60ns top)
 //TODO use nanosleep
 #define TRWVCSL (0)
 #define TCSLCSH (1) //60ns
-#define TCSHCSL (0)
+#define TCSHCSL (1) //50ns
 #define TRHRL (1)
 #define TRSVCSL (0)
 #define TCSLDrV (1) //50ns
@@ -62,8 +63,8 @@ void enable_out_int(void) {
     bcm2835_gpio_write_mask (1<<D1, 1<<D1);
     bcm2835_gpio_write(CS, LOW);
     bcm2835_delayMicroseconds (TCSLCSH);
-    //CS=1
     bcm2835_gpio_write(CS, HIGH);
+    bcm2835_delayMicroseconds (TCSHCSL);
 }
 
 void enable_in_int(void) {
@@ -73,8 +74,8 @@ void enable_in_int(void) {
     bcm2835_gpio_write_mask (1<<D1, 1<<D1);
     bcm2835_gpio_write(CS, LOW);
     bcm2835_delayMicroseconds (TCSLCSH);
-    //CS=1
     bcm2835_gpio_write(CS, HIGH);
+    bcm2835_delayMicroseconds (TCSHCSL);
 }
 
 void write_byte(uint8_t byte) {
@@ -106,6 +107,7 @@ void write_byte(uint8_t byte) {
     bcm2835_delayMicroseconds (TCSLCSH);
     //CS=1
     bcm2835_gpio_write(CS, HIGH);
+    bcm2835_delayMicroseconds (TCSHCSL);
 }
 
 uint8_t read_c011(void) {
@@ -138,6 +140,7 @@ uint8_t read_c011(void) {
     byte <<= 1;
     byte |= d0;
     bcm2835_gpio_write(CS, HIGH);
+    bcm2835_delayMicroseconds (TCSHCSL);
     return byte;
 }
 

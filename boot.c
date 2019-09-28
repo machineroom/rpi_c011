@@ -14,14 +14,17 @@
 #include <stdbool.h>
 #include <time.h>
 #include "c011.h"
+#include <bcm2835.h>
+
 
 int main(int argc, char *argv[])
 {
 	int ret = 0;
 	c011_init();
     reset();
-    //enable_in_int();
-    //enable_out_int();
+    bcm2835_delayMicroseconds (5*1000);
+    enable_in_int();
+    enable_out_int();
     uint8_t read;
     //blatant copy from https://github.com/hessch/rpilink/blob/master/utils/tdetect.py
     // & http://www.geekdot.com/category/software/transputer-software/ (iTest)
@@ -44,6 +47,7 @@ int main(int argc, char *argv[])
                                    will be input from the link and placed in memory starting at MEMSTART.
                                    This code will then be executed."
                                    http://www.wizzy.com/wizzy/transputer_faq.txt*/
+    printf ("write 0x%X byte to link\n",sizeof(boot)); 
     c011_write_bytes (boot, sizeof(boot));
     uint8_t rx[8];
     memset(rx,0,sizeof(rx));
