@@ -47,7 +47,7 @@ void c011_init(void) {
     set_control_output_pins();
 }
 
-void reset(void) {
+void c011_reset(void) {
     //TN29 states "Recommended pulse width is 5 ms, with a delay of 5 ms before sending anything down a link."
     bcm2835_gpio_write(RESET, LOW);
     bcm2835_gpio_write(RESET, HIGH);
@@ -56,7 +56,7 @@ void reset(void) {
     bcm2835_delayMicroseconds (5*1000);
 }
 
-void enable_out_int(void) {
+void c011_enable_out_int(void) {
     set_data_output_pins();
     bcm2835_gpio_write_mask (1<<RS1 | 1<<RS0 | 0<<RW | 1<<CS,
                              1<<RS1 | 1<<RS0 | 1<<RW | 1<<CS);
@@ -69,7 +69,7 @@ void enable_out_int(void) {
     bcm2835_delayMicroseconds (TCSHCSL);
 }
 
-void enable_in_int(void) {
+void c011_enable_in_int(void) {
     set_data_output_pins();
     bcm2835_gpio_write_mask (1<<RS1 | 0<<RS0 | 0<<RW | 1<<CS,
                              1<<RS1 | 1<<RS0 | 1<<RW | 1<<CS);
@@ -81,9 +81,9 @@ void enable_in_int(void) {
     bcm2835_delayMicroseconds (TCSHCSL);
 }
 
-void write_byte(uint8_t byte) {
+void c011_write_byte(uint8_t byte) {
     //wait for output ready
-    while (read_output_status() & 0x01 != 0x01) {
+    while ((c011_read_output_status() & 0x01) != 0x01) {
         printf ("OW\n");
         bcm2835_delayMicroseconds(1);
     }
@@ -113,7 +113,7 @@ void write_byte(uint8_t byte) {
     bcm2835_delayMicroseconds (TCSHCSL);
 }
 
-uint8_t read_c011(void) {
+static uint8_t read_c011(void) {
     uint8_t d7,d6,d5,d4,d3,d2,d1,d0,byte;
     set_data_input_pins();
     bcm2835_gpio_write(CS, LOW);
@@ -147,7 +147,7 @@ uint8_t read_c011(void) {
     return byte;
 }
 
-uint8_t read_input_status(void) {
+uint8_t c011_read_input_status(void) {
     uint8_t byte;
     bcm2835_gpio_write_mask (1<<RS1 | 0<<RS0 | 1<<RW | 1<<CS,
                              1<<RS1 | 1<<RS0 | 1<<RW | 1<<CS);
@@ -155,7 +155,7 @@ uint8_t read_input_status(void) {
     return byte;
 }
 
-uint8_t read_output_status(void) {
+uint8_t c011_read_output_status(void) {
     uint8_t byte;
     bcm2835_gpio_write_mask (1<<RS1 | 1<<RS0 | 1<<RW | 1<<CS,
                              1<<RS1 | 1<<RS0 | 1<<RW | 1<<CS);
@@ -163,27 +163,34 @@ uint8_t read_output_status(void) {
     return byte;
 }
 
-uint8_t read_byte(void) {
-    uint8_t byte;
-    while (read_input_status() & 0x01 == 0x00) {
-        printf ("IW\n");
-        bcm2835_delayMicroseconds(1);
+int c011_read_byte(uint8_t *byte, uint32_t timeout) {
+    while ((c011_read_input_status() & 0x01) == 0x00 && timeout>0) {
+        bcm2835_delayMicroseconds(1000);
+        timeout--;
+    }
+    if (timeout == 0) {
+        return -1;
     }
     bcm2835_gpio_write_mask (0<<RS1 | 0<<RS0 | 1<<RW | 1<<CS,
                              1<<RS1 | 1<<RS0 | 1<<RW | 1<<CS);
-    byte = read_c011();
-    return byte;
+    *byte = read_c011();
+    return 0;
 }
 
 void c011_write_bytes (uint8_t *bytes, uint32_t num) {
     for (uint32_t i=0; i < num; i++) {
-        write_byte(bytes[i]);
+        c011_write_byte(bytes[i]);
     }
 }
 
-void c011_read_bytes (uint8_t *bytes, uint32_t num) {
-    for (uint32_t i=0; i < num; i++) {
-        bytes[i] = read_byte();
+uint32_t c011_read_bytes (uint8_t *bytes, uint32_t num, uint32_t timeout) {
+    uint32_t i;
+    for (i=0; i < num; i++) {
+        int ret = c011_read_byte(&bytes[i], timeout);
+        if (ret == -1) {
+            break;
+        }
     }
+    return i;
 }
 

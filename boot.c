@@ -21,9 +21,9 @@ int main(int argc, char *argv[])
 {
 	int ret = 0;
 	c011_init();
-    reset();
-    enable_in_int();
-    enable_out_int();
+    c011_reset();
+    c011_enable_in_int();
+    c011_enable_out_int();
     //blatant copy from https://github.com/hessch/rpilink/blob/master/utils/tdetect.py
     // & http://www.geekdot.com/category/software/transputer-software/ (iTest)
     uint8_t boot[] = 
@@ -45,11 +45,12 @@ int main(int argc, char *argv[])
                                    will be input from the link and placed in memory starting at MEMSTART.
                                    This code will then be executed."
                                    http://www.wizzy.com/wizzy/transputer_faq.txt*/
-    printf ("write 0x%X byte to link\n",sizeof(boot)); 
+    printf ("write %d bytes to link\n",sizeof(boot)); 
     c011_write_bytes (boot, sizeof(boot));
     uint8_t rx[8];
     memset(rx,0,sizeof(rx));
-    c011_read_bytes (rx, sizeof(rx));
-    printf ("reply = [%02X %02X %02X %02X %02X %02X]\n", rx[0], rx[1], rx[2], rx[3], rx[4], rx[5]);
+    uint32_t num;
+    num = c011_read_bytes (rx, sizeof(rx), 200);
+    printf ("num read = %u, reply = [%02X %02X %02X %02X %02X %02X]\n", num, rx[0], rx[1], rx[2], rx[3], rx[4], rx[5]);
 	return ret;
 }

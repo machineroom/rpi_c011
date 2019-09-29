@@ -17,22 +17,24 @@
 
 int main(int argc, char *argv[])
 {
-	int ret = 0;
-	int fd;
+	int ret;
     uint8_t i=0;
 	c011_init();
-    reset();
-    enable_in_int();
-    enable_out_int();
+    c011_reset();
+    c011_enable_in_int();
+    c011_enable_out_int();
     uint8_t read;
     while (true) {
-        write_byte(i);
-        read = read_byte();
-        if (read != i) {
-            printf ("*E* write=0x%X read=0x%X\n",i,read);
+        c011_write_byte(i);
+        ret = c011_read_byte(&read, 200);
+        if (ret == -1) {
+            printf ("timeou\n");
+            } else {        
+            if (read != i) {
+                printf ("*E* write=0x%X read=0x%X\n",i,read);
+            }
         }
         i++;
     }
-	
-	return ret;
+	return 0;
 }
