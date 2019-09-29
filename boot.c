@@ -22,10 +22,8 @@ int main(int argc, char *argv[])
 	int ret = 0;
 	c011_init();
     reset();
-    bcm2835_delayMicroseconds (5*1000);
     enable_in_int();
     enable_out_int();
-    uint8_t read;
     //blatant copy from https://github.com/hessch/rpilink/blob/master/utils/tdetect.py
     // & http://www.geekdot.com/category/software/transputer-software/ (iTest)
     uint8_t boot[] = 

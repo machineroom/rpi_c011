@@ -41,26 +41,28 @@ static void set_data_input_pins(void) {
     bcm2835_gpio_fsel(D6, BCM2835_GPIO_FSEL_INPT);
     bcm2835_gpio_fsel(D7, BCM2835_GPIO_FSEL_INPT);
 }
-
+        
 void c011_init(void) {
     bcm2835_init();
     set_control_output_pins();
 }
 
 void reset(void) {
-    //RESET=1
+    //TN29 states "Recommended pulse width is 5 ms, with a delay of 5 ms before sending anything down a link."
     bcm2835_gpio_write(RESET, LOW);
-    bcm2835_delayMicroseconds (TRHRL);
     bcm2835_gpio_write(RESET, HIGH);
-    bcm2835_delayMicroseconds (TRHRL);
+    bcm2835_delayMicroseconds (5*1000);
     bcm2835_gpio_write(RESET, LOW);
+    bcm2835_delayMicroseconds (5*1000);
 }
 
 void enable_out_int(void) {
     set_data_output_pins();
     bcm2835_gpio_write_mask (1<<RS1 | 1<<RS0 | 0<<RW | 1<<CS,
                              1<<RS1 | 1<<RS0 | 1<<RW | 1<<CS);
-    bcm2835_gpio_write_mask (1<<D1, 1<<D1);
+    bcm2835_gpio_write_mask (1<<D1,
+                             1<<D7 | 1<<D6 | 1<<D5 | 1<<D4 | 1<<D3 | 1<<D2 | 1<<D1 | 1<<D0);
+
     bcm2835_gpio_write(CS, LOW);
     bcm2835_delayMicroseconds (TCSLCSH);
     bcm2835_gpio_write(CS, HIGH);
@@ -71,7 +73,8 @@ void enable_in_int(void) {
     set_data_output_pins();
     bcm2835_gpio_write_mask (1<<RS1 | 0<<RS0 | 0<<RW | 1<<CS,
                              1<<RS1 | 1<<RS0 | 1<<RW | 1<<CS);
-    bcm2835_gpio_write_mask (1<<D1, 1<<D1);
+    bcm2835_gpio_write_mask (1<<D1,
+                             1<<D7 | 1<<D6 | 1<<D5 | 1<<D4 | 1<<D3 | 1<<D2 | 1<<D1 | 1<<D0);
     bcm2835_gpio_write(CS, LOW);
     bcm2835_delayMicroseconds (TCSLCSH);
     bcm2835_gpio_write(CS, HIGH);
