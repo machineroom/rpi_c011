@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     c011_enable_out_int();
     uint8_t read;
     while (true) {
-        c011_write_byte(i);
+        c011_write_byte(i,200);
         ret = c011_read_byte(&read, 200);
         if (ret == -1) {
             printf ("timeou\n");

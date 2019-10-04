@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 	int ret = 0;
 	c011_init();
     c011_reset();
+    c011_analyse();
     c011_enable_in_int();
     c011_enable_out_int();
     //blatant copy from https://github.com/hessch/rpilink/blob/master/utils/tdetect.py
@@ -46,7 +47,11 @@ int main(int argc, char *argv[])
                                    This code will then be executed."
                                    http://www.wizzy.com/wizzy/transputer_faq.txt*/
     printf ("write %d bytes to link\n",sizeof(boot)); 
-    c011_write_bytes (boot, sizeof(boot));
+    ret = c011_write_bytes (boot, sizeof(boot), 200);
+    if (ret != sizeof(boot)) {
+        printf ("failed to write bootstrap - ret = %d\n", ret);
+        exit(-1);
+    }
     uint8_t rx[8];
     memset(rx,0,sizeof(rx));
     uint32_t num;

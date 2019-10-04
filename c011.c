@@ -1,7 +1,6 @@
 #include <bcm2835.h>
 #include "pins.h"
 #include "c011.h"
-#include <stdio.h>
 
 //all the C011 timings are <1uS (60ns top)
 //TODO use nanosleep
@@ -45,14 +44,30 @@ static void set_data_input_pins(void) {
 void c011_init(void) {
     bcm2835_init();
     set_control_output_pins();
+    bcm2835_gpio_write(ANALYSE, LOW);
+    c011_reset();
 }
 
 void c011_reset(void) {
+    bcm2835_gpio_write(ANALYSE, LOW);
     //TN29 states "Recommended pulse width is 5 ms, with a delay of 5 ms before sending anything down a link."
     bcm2835_gpio_write(RESET, LOW);
     bcm2835_gpio_write(RESET, HIGH);
     bcm2835_delayMicroseconds (5*1000);
     bcm2835_gpio_write(RESET, LOW);
+    bcm2835_delayMicroseconds (5*1000);
+}
+
+void c011_analyse(void) {
+    bcm2835_gpio_write(ANALYSE, LOW);
+    bcm2835_delayMicroseconds (5*1000);
+    bcm2835_gpio_write(ANALYSE, HIGH);
+    bcm2835_delayMicroseconds (5*1000);
+    bcm2835_gpio_write(RESET, HIGH);
+    bcm2835_delayMicroseconds (5*1000);
+    bcm2835_gpio_write(RESET, LOW);
+    bcm2835_delayMicroseconds (5*1000);
+    bcm2835_gpio_write(ANALYSE, LOW);
     bcm2835_delayMicroseconds (5*1000);
 }
 
@@ -81,11 +96,14 @@ void c011_enable_in_int(void) {
     bcm2835_delayMicroseconds (TCSHCSL);
 }
 
-void c011_write_byte(uint8_t byte) {
+int c011_write_byte(uint8_t byte, uint32_t timeout) {
     //wait for output ready
-    while ((c011_read_output_status() & 0x01) != 0x01) {
-        printf ("OW\n");
-        bcm2835_delayMicroseconds(1);
+    while ((c011_read_output_status() & 0x01) != 0x01 && timeout>0) {
+        bcm2835_delayMicroseconds(1000);
+        timeout--;
+    }
+    if (timeout == 0) {
+        return -1;
     }
     //RS1=0, RS0=1
     //RW=0
@@ -111,6 +129,7 @@ void c011_write_byte(uint8_t byte) {
     //CS=1
     bcm2835_gpio_write(CS, HIGH);
     bcm2835_delayMicroseconds (TCSHCSL);
+    return 0;
 }
 
 static uint8_t read_c011(void) {
@@ -177,10 +196,15 @@ int c011_read_byte(uint8_t *byte, uint32_t timeout) {
     return 0;
 }
 
-void c011_write_bytes (uint8_t *bytes, uint32_t num) {
-    for (uint32_t i=0; i < num; i++) {
-        c011_write_byte(bytes[i]);
+uint32_t c011_write_bytes (uint8_t *bytes, uint32_t num, uint32_t timeout) {
+    uint32_t i;
+    for (i=0; i < num; i++) {
+        int ret = c011_write_byte(bytes[i], timeout);
+        if (ret == -1) {
+            break;
+        }
     }
+    return i;
 }
 
 uint32_t c011_read_bytes (uint8_t *bytes, uint32_t num, uint32_t timeout) {

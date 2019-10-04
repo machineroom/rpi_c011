@@ -19,5 +19,7 @@ bcm2835 lib uses 40 pin J8 connector pin numbering
 #define RESET RPI_V2_GPIO_P1_21 //YELLOW
 #define CS RPI_V2_GPIO_P1_22    //GREEN
 #define RW RPI_V2_GPIO_P1_23    //BLUE
+#define ANALYSE RPI_V2_GPIO_P1_24 //VIOLET
+
 
 
