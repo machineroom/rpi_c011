@@ -28,5 +28,6 @@ bcm2835 lib uses 40 pin J8 connector pin numbering
 
 
 //									BLACK		GND				| */GND						| 14,11,16
+//                                  BLACK       GND             | */GND                     | 17 (10Mbps)
 //									ORANGE		3V3				| */VA,*/OE
 //									RED			5V				| */VB						| 28

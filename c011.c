@@ -8,9 +8,9 @@
 #include <stdio.h>
 
 
-#define TCSLCSH (60)
+#define TCSLCSH (50)
 #define TCSHCSL (50)
-#define TCSLDrV (50)
+#define TCSLDrV (40)
 
 static uint32_t bits=0;
 static volatile uint32_t *gpio_clr;
@@ -48,10 +48,23 @@ void c011_dump_stats(char *title) {
     total_write_success=0;
 }
 
+/**
+ * @brief sleep for specified ns (or longer). 
+ * 
+ * @param ns 
+ */
 static inline void sleep_ns(int ns) {
+    //TODO actually implement a good ns sleep if possible
+    //rpi4 nanosleep (1) sleeps for >64uS
     uint64_t        start;
     start =  bcm2835_st_read();
-    bcm2835_st_delay(start, 1);
+    uint64_t us = ns/1000;
+    if (us==0) {
+        us=1;
+    }
+    bcm2835_st_delay(start, us);
+    uint64_t        end;
+    end =  bcm2835_st_read();
 }
 
 static void set_control_pins(void) {
@@ -192,9 +205,16 @@ void c011_analyse(void) {
     bcm2835_delayMicroseconds (5*1000);*/
 }
 
+/**
+ * @brief write a single byte to the C011
+ * 
+ * @param byte the byte to write
+ * @param timeout timeout in ms
+ * @return int -1 on timeout or 0 on success
+ */
 int c011_write_byte(uint8_t byte, uint32_t timeout) {
     //wait for output ready
-    uint64_t timeout_ns = timeout*1000*1000;
+    uint64_t timeout_ns = timeout*1000*1000;    // 1000000ns=1000us=1ms
     uint32_t word;
     total_writes++;
     while (((bcm2835_peri_read(gpio_lev) & (1<<OUT_INT)) == 0) && timeout_ns>0) {
@@ -203,6 +223,7 @@ int c011_write_byte(uint8_t byte, uint32_t timeout) {
         total_write_waits++;
     }
     if (timeout_ns == 0) {
+        printf ("timeout\n");
         total_write_timeouts++;
         return -1;
     }
@@ -256,6 +277,13 @@ uint8_t c011_read_output_status(void) {
     return byte;
 }
 
+/**
+ * @brief read a single byte from the C011 link
+ * 
+ * @param byte 
+ * @param timeout timeout in ms (or 0 blocking)
+ * @return int -1 on timeout or 0 on success
+ */
 int c011_read_byte(uint8_t *byte, uint32_t timeout) {
     total_reads++;
     if (timeout==0) {
@@ -263,15 +291,15 @@ int c011_read_byte(uint8_t *byte, uint32_t timeout) {
             total_read_waits++;
         }
     } else {
-        uint64_t timeout_ns = timeout*1000*1000;
-        while (((bcm2835_peri_read(gpio_lev) & (1<<IN_INT)) == 0) && timeout_ns>0) {
-            sleep_ns(1);
-            timeout_ns--;
+        uint64_t timeout_us = timeout*1000;    // 1000us=1ms
+        uint64_t start;
+        start = bcm2835_st_read();
+        while (((bcm2835_peri_read(gpio_lev) & (1<<IN_INT)) == 0)) {
+            if (bcm2835_st_read() - start > timeout_us) {
+                total_read_timeouts++;
+                return -1;
+            }
             total_read_waits++;
-        }
-        if (timeout_ns == 0) {
-            total_read_timeouts++;
-            return -1;
         }
     }
     set_gpio_bit (RS1,0);

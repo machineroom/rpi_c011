@@ -50,10 +50,12 @@ int main(int argc, char *argv[])
         printf ("failed to write bootstrap - ret = %d\n", ret);
         exit(-1);
     }
-    uint8_t rx[8];
+    c011_dump_stats ("write bootstrap");
+    uint8_t rx[6];
     memset(rx,0,sizeof(rx));
     uint32_t num;
     num = c011_read_bytes (rx, sizeof(rx), 200);
+    c011_dump_stats ("read result");
     printf ("num read = %u, reply = [%02X %02X %02X %02X %02X %02X]\n", num, rx[0], rx[1], rx[2], rx[3], rx[4], rx[5]);
 	return ret;
 }
