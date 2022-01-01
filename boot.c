@@ -22,9 +22,7 @@ int main(int argc, char *argv[])
 	int ret = 0;
 	c011_init();
     c011_reset();
-    c011_analyse();
-    c011_enable_in_int();
-    c011_enable_out_int();
+//    c011_analyse();
     //blatant copy from https://github.com/hessch/rpilink/blob/master/utils/tdetect.py
     // & http://www.geekdot.com/category/software/transputer-software/ (iTest)
     uint8_t boot[] = 
@@ -46,7 +44,7 @@ int main(int argc, char *argv[])
                                    will be input from the link and placed in memory starting at MEMSTART.
                                    This code will then be executed."
                                    http://www.wizzy.com/wizzy/transputer_faq.txt*/
-    printf ("write %d bytes to link\n",sizeof(boot)); 
+    printf ("write %ld bytes to link\n",sizeof(boot)); 
     ret = c011_write_bytes (boot, sizeof(boot), 200);
     if (ret != sizeof(boot)) {
         printf ("failed to write bootstrap - ret = %d\n", ret);

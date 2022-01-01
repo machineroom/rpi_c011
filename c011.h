@@ -6,10 +6,6 @@ extern void c011_reset(void);
 
 extern void c011_analyse(void);
 
-extern void c011_enable_out_int(void);
-
-extern void c011_enable_in_int(void);
-
 extern uint8_t c011_read_input_status(void);
 
 extern uint8_t c011_read_output_status(void);
@@ -29,4 +25,10 @@ extern uint32_t c011_read_bytes (uint8_t *bytes, uint32_t num, uint32_t timeout)
 //timeout in ms (per byte)
 //return: num bytes written
 extern uint32_t c011_write_bytes (uint8_t *bytes, uint32_t num, uint32_t timeout);
+
+extern void c011_dump_stats(char *title);
+
+extern void c011_set_byte_mode(void);
+
+extern void c011_clear_byte_mode(void);
 
