@@ -56,6 +56,7 @@ void c011_dump_stats(char *title) {
 static inline void sleep_ns(int ns) {
     //TODO actually implement a good ns sleep if possible
     //rpi4 nanosleep (1) sleeps for >64uS
+    //testing with scope shows bcm2835_st_delay(1us) is pretty accurate
     uint64_t        start;
     start =  bcm2835_st_read();
     uint64_t us = ns/1000;
@@ -91,6 +92,7 @@ static inline void set_data_input_pins(void) {
     bcm2835_peri_write (gpio_fsel, 0);
 }
 
+//testing with scope shows set_gpio_bit takes ~6ns
 static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
     if (on) {
         bits |= 1<<pin;
@@ -99,6 +101,7 @@ static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
     }
 }
 
+//testing with scope shows gpio_commit takes ~150ns (rpi4 -O3)
 static inline void gpio_commit(void) {
     bcm2835_peri_write (gpio_clr, ~bits);
     bcm2835_peri_write (gpio_set, bits);
