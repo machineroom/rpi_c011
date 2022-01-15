@@ -54,18 +54,10 @@ void c011_dump_stats(const char *title) {
  * @param ns 
  */
 static inline void sleep_ns(int ns) {
-    //TODO actually implement a good ns sleep if possible
-    //rpi4 nanosleep (1) sleeps for >64uS
-    //testing with scope shows bcm2835_st_delay(1us) is pretty accurate
-    uint64_t        start;
-    start =  bcm2835_st_read();
-    uint64_t us = ns/1000;
-    if (us==0) {
-        us=1;
+    //timing with rpi4 shows this is good enough for the small sleeps required by C011
+    for (int i=0; i < ns+10; i++) {
+        asm ("nop");
     }
-    bcm2835_st_delay(start, us);
-    uint64_t        end;
-    end =  bcm2835_st_read();
 }
 
 static void set_control_pins(void) {
