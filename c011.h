@@ -26,7 +26,7 @@ extern uint32_t c011_read_bytes (uint8_t *bytes, uint32_t num, uint32_t timeout)
 //return: num bytes written
 extern uint32_t c011_write_bytes (uint8_t *bytes, uint32_t num, uint32_t timeout);
 
-extern void c011_dump_stats(char *title);
+extern void c011_dump_stats(const char *title);
 
 extern void c011_set_byte_mode(void);
 

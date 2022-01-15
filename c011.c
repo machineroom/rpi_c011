@@ -28,7 +28,7 @@ static uint64_t total_write_waits=0;
 static uint64_t total_write_timeouts=0;
 static uint64_t total_write_success=0;
 
-void c011_dump_stats(char *title) {
+void c011_dump_stats(const char *title) {
     printf ("C011 interfaces stats for '%s'\n",title);
     printf ("\ttotal reads %lu\n",total_reads);
     printf ("\ttotal read waits %lu\n",total_read_waits);
