@@ -44,18 +44,18 @@ int main(int argc, char *argv[])
                                    will be input from the link and placed in memory starting at MEMSTART.
                                    This code will then be executed."
                                    http://www.wizzy.com/wizzy/transputer_faq.txt*/
+    uint8_t rx[6];
+    memset(rx,0,sizeof(rx));
+    uint32_t num;
     printf ("write %ld bytes to link\n",sizeof(boot)); 
     ret = c011_write_bytes (boot, sizeof(boot), 200);
     if (ret != sizeof(boot)) {
         printf ("failed to write bootstrap - ret = %d\n", ret);
         exit(-1);
     }
-    c011_dump_stats ("write bootstrap");
-    uint8_t rx[6];
-    memset(rx,0,sizeof(rx));
-    uint32_t num;
+    //c011_dump_stats ("write bootstrap");
     num = c011_read_bytes (rx, sizeof(rx), 200);
-    c011_dump_stats ("read result");
+    //c011_dump_stats ("read result");
     printf ("num read = %u, reply = [%02X %02X %02X %02X %02X %02X]\n", num, rx[0], rx[1], rx[2], rx[3], rx[4], rx[5]);
 	return ret;
 }
