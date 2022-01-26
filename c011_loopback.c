@@ -24,13 +24,19 @@ int main(int argc, char *argv[])
     uint8_t read;
     int count=0;
     while (true) {
-        c011_write_byte(i,200);
+        ret = c011_write_byte(i,200);
+        if (ret == -1) {
+            printf ("write timeout\n");
+            break;
+        }
         ret = c011_read_byte(&read, 200);
         if (ret == -1) {
-            printf ("timeout\n");
+            printf ("read timeout\n");
+            break;
         } else {        
             if (read != i) {
                 printf ("*E* write=0x%X read=0x%X\n",i,read);
+                break;
             } else {
                 printf ("OK %d\n", count++);
             }

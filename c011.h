@@ -6,10 +6,6 @@ extern void c011_reset(void);
 
 extern void c011_analyse(void);
 
-extern uint8_t c011_read_input_status(void);
-
-extern uint8_t c011_read_output_status(void);
-
 //timeout in ms
 //return: 0 OK, -1 timeout
 extern int c011_read_byte(uint8_t *byte, uint32_t timeout);

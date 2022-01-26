@@ -223,19 +223,18 @@ void c011_analyse(void) {
  */
 int c011_write_byte(uint8_t byte, uint32_t timeout) {
     //wait for output ready
-    uint64_t timeout_ns = timeout*1000*1000;    // 1000000ns=1000us=1ms
     uint32_t word;
     total_writes++;
     // wait for OutputInt pin to go high (thereby indicating ready to write)
-    while (((bcm2835_peri_read(gpio_lev) & (1<<OUT_INT)) == 0) && timeout_ns>0) {
-        sleep_ns(1);
-        timeout_ns--;
+    uint64_t timeout_us = timeout*1000;    // 1000us=1ms
+    uint64_t start;
+    start = bcm2835_st_read();
+    while (((bcm2835_peri_read(gpio_lev) & (1<<OUT_INT)) == 0)) {
+        if (bcm2835_st_read() - start > timeout_us) {
+            total_write_timeouts++;
+            return -1;
+        }
         total_write_waits++;
-    }
-    if (timeout_ns == 0) {
-        printf ("timeout\n");
-        total_write_timeouts++;
-        return -1;
     }
     set_data_output_pins();
     set_gpio_bit (RS1,0);
@@ -260,27 +259,6 @@ static uint8_t read_c011(void) {
     set_gpio_bit(CS, HIGH);
     gpio_commit();
     sleep_ns (TCSHCSL);
-    return byte;
-}
-
-uint8_t c011_read_input_status(void) {
-    uint8_t byte;
-    set_gpio_bit (RS1,1);
-    set_gpio_bit (RS0,0);
-    set_gpio_bit (RW,1);
-    gpio_commit();
-    byte = read_c011();
-    return byte;
-}
-
-
-uint8_t c011_read_output_status(void) {
-    uint8_t byte;
-    set_gpio_bit (RS1,1);
-    set_gpio_bit (RS0,1);
-    set_gpio_bit (RW,1);
-    gpio_commit();
-    byte = read_c011();
     return byte;
 }
 
