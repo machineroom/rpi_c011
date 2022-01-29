@@ -18,12 +18,13 @@
 int main(int argc, char *argv[])
 {
     int ret;
-    uint8_t i=0;
+    uint8_t i=0xAA;
     c011_init();
     c011_reset();
     uint8_t read;
     int count=0;
     while (true) {
+        printf ("W 0x%X ", i);
         ret = c011_write_byte(i,200);
         if (ret == -1) {
             printf ("write timeout\n");
@@ -34,6 +35,7 @@ int main(int argc, char *argv[])
             printf ("read timeout\n");
             break;
         } else {        
+            printf ("R 0x%X ", read);
             if (read != i) {
                 printf ("*E* write=0x%X read=0x%X\n",i,read);
                 break;
@@ -41,7 +43,7 @@ int main(int argc, char *argv[])
                 printf ("OK %d\n", count++);
             }
         }
-        i++;
+        i=~i;
     }
     return 0;
 }

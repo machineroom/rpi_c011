@@ -63,9 +63,10 @@ void c011_dump_stats(const char *title) {
  */
 static inline void sleep_ns(int ns) {
     //scope timing with rpi4 shows this is good enough for the small sleeps required by C011
-    for (int i=0; i < ns+10; i++) {
-        asm ("nop");
-    }
+    //for (int i=0; i < ns; i++) {
+    //    asm ("nop");
+   // }
+    bcm2835_delayMicroseconds(1);
 }
 
 static void set_control_pins(void) {
@@ -78,6 +79,8 @@ static void set_control_pins(void) {
 
     bcm2835_gpio_fsel(IN_INT, BCM2835_GPIO_FSEL_INPT);
     bcm2835_gpio_fsel(OUT_INT, BCM2835_GPIO_FSEL_INPT);
+    bcm2835_gpio_set_pud(IN_INT, BCM2835_GPIO_PUD_DOWN);
+    bcm2835_gpio_set_pud(OUT_INT, BCM2835_GPIO_PUD_DOWN);
 }
 
 static inline void set_data_output_pins(void) {
@@ -108,6 +111,8 @@ static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
 }
 
 //testing with scope shows gpio_commit takes ~150ns (rpi4 -O3)
+// bcm2835_peri_write ~75ns
+// bcm2835_peri_write_nb ~5ns
 static inline void gpio_commit(void) {
     bcm2835_peri_write (gpio_clr, ~bits);
     bcm2835_peri_write (gpio_set, bits);
@@ -121,6 +126,8 @@ static void c011_put_byte(uint8_t byte) {
     bits &= 0xFFFFFC03;
     word <<= 2;
     bits |= word;
+    // commit the byte to the data pins before asserting CS
+    gpio_commit();
     //CS=0
     set_gpio_bit(CS, LOW);
     gpio_commit();
@@ -132,7 +139,6 @@ static void c011_put_byte(uint8_t byte) {
 }
 
 static void c011_enable_in_int(void) {
-    bcm2835_gpio_set_pud(IN_INT, BCM2835_GPIO_PUD_DOWN);
     set_data_output_pins();
     set_gpio_bit (RS1,1);
     set_gpio_bit (RS0,0);
@@ -142,7 +148,6 @@ static void c011_enable_in_int(void) {
 }
 
 static void c011_enable_out_int(void) {
-    bcm2835_gpio_set_pud(OUT_INT, BCM2835_GPIO_PUD_DOWN);
     set_data_output_pins();
     set_gpio_bit (RS1,1);
     set_gpio_bit (RS0,1);
@@ -162,6 +167,7 @@ void c011_init(void) {
 
     //set_gpio_bit(ANALYSE, LOW);
     gpio_commit();
+
 }
 
 void c011_reset(void) {
