@@ -1,6 +1,6 @@
 [General]
 decode_signals=0
-meta_objs=0
+meta_objs=1
 views=1
 
 [0]
@@ -18,11 +18,11 @@ enabled=true
 name=RS1
 
 [10]
-color=4279638298
+color=4293863721
 conv_options=0
 conversion_type=0
-enabled=false
-name=10
+enabled=true
+name=link
 
 [11]
 color=4287582722
@@ -115,6 +115,12 @@ conversion_type=0
 enabled=true
 name=inInt
 
+[meta_obj0]
+assoc_view=0
+end_time=22 serialization::archive 18 0 0 0 0 23074 0 3259 33724454 33033135 33990410 -8 0 0 6
+start_time=22 serialization::archive 18 0 0 0 0 23043 99999999 99995967 25364092 71970114 72373559 -8 0 0 6
+type=selection
+
 [view0]
 0\trace_height=34
 1\trace_height=34
@@ -132,9 +138,9 @@ name=inInt
 7\trace_height=34
 8\trace_height=34
 9\trace_height=34
-offset=22 serialization::archive 18 0 0 0 0 80581442 46353311 731094 88880049 86653693 0 -8 1 0 6
-scale=0.006077795786061586
-segment_display_mode=1
-splitter_state=@ByteArray(\0\0\0\xff\0\0\0\x1\0\0\0\x2\0\0\0_\0\0\x3\x84\x1\0\0\0\x1\x1\0\0\0\x1\0)
-v_offset=22
+offset=22 serialization::archive 18 0 0 0 0 705472 32837333 39545662 42381591 1600128 60483877 -8 0 0 6
+scale=1.3879608552600247e-07
+segment_display_mode=3
+splitter_state=@ByteArray(\0\0\0\xff\0\0\0\x1\0\0\0\x2\0\0\0_\0\0\x4\xe0\x1\0\0\0\x1\x1\0\0\0\x1\0)
+v_offset=3
 zero_offset=22 serialization::archive 18 0 0 0 0 0 0 0 0 0 0 0 0 0 6
