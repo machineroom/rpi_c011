@@ -15,8 +15,7 @@
 #include <time.h>
 #include "c011.h"
 
-int main(int argc, char *argv[])
-{
+int test_all_byte_values(void) {
     int ret;
     // fails before 1 million iterations
     // F7   11111110 in 80255
@@ -87,4 +86,40 @@ int main(int argc, char *argv[])
         //i = ~i;
     }
     return 0;
+}
+
+int test_single_byte_value (uint8_t val) {
+    int ret;
+    c011_init();
+    c011_reset();
+    uint8_t read;
+    int count=0;
+    while (true) {
+        printf ("W 0x%X ", val);
+        ret = c011_write_byte(val,200);
+        if (ret == -1) {
+            printf ("write timeout\n");
+            break;
+        }
+        ret = c011_read_byte(&read, 200);
+        if (ret == -1) {
+            printf ("read timeout\n");
+            break;
+        } else {        
+            printf ("R 0x%X ", read);
+            if (read != val) {
+                printf ("*E* write=0x%X read=0x%X\n",val,read);
+                break;
+            } else {
+                printf ("OK %d\n", count++);
+            }
+        }
+    }
+    return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    //return test_all_byte_values();
+    return test_single_byte_value(0x40);
 }
