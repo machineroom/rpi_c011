@@ -18,68 +18,71 @@
 int main(int argc, char *argv[])
 {
     int ret;
-    // AA,55 OK  10101010 01010101  4,4
-    // 33,CC OK  00110011 11001100  4,4
-    // 44,BB OK  01000100 10111011  2,6
-    // 66,99 OK  01100110 10011001  4,4
-    // 22,DD OK  00100010 11011101  2,6 
-    // 22,DE OK  00100010 11011110  2,6
-    // 09,F6 OK  00001001 11110110  2,6
-    // FF    OK  11111111
-    // FE    OK  11111110
-    // FC    OK  11111100
-    // 7C    OK  01111100
-    // 3C    OK  00111100
-    // 1C    OK  00011100
-    // 31    OK  00110001
-    // 43    OK  01000011
-    // 84    OK  10000100
-    // 42    OK  01000010
-
-    // 21    BAD 00100001
-    // 41    BAD 01000001
-    // 18    BAD 00011000
-    // 38    BAD 00111000
-    // 88    BAD 10001000
-    // 81    BAD 10000001
-    // 80    BAD 10000000
-    // 11    BAD 00010001
-    // 08    BAD 00001000
-    // 09    BAD 00001001 (but takes time)
-    // 07    BAD 00000111 (but takes time)           W 07 R 20
-    // 03    BAD 00000003
-    // 01    BAD 00000001
-    // 00    BAD 00000000 (really quickly)
-    // 18,38 BAD 00011000 00111000  2,3
-    // 21,DD BAD 00100001 11011101  2,6     W 21 R FF
-    // 21,DE BAD 00100001 11011110  2,6     W 21 R FB
-    // 20,DF BAD 00100000 11011111  1,7     W 20 R 28
-    // 11,EE BAD 00010001 11101110  2,6     W 11 R FF
-    uint8_t i=0x42;
+    // fails before 1 million iterations
+    // F7   11111110 in 80255
+    // C0   11000000 in 1136
+    // A0   10100000 in 4
+    // 90   10010000 in 37445
+    // 8A   10001010 in 42501
+    // 88   10001000 in 2122
+    // 84   10000100 in 1076
+    // 81   10000001 in 462K
+    // 80   10000000 in 1481
+    // 60   01100000 in 17
+    // 50   01010000 in 1
+    // 40   01000000 in 0
+    // 30   00110000 in 2
+    // 20   00100000 in 2
+    // 10   00010000 in 28
+    // 08   00001000 in 596
+    // 07   00000111 in 97175
+    // 06   00000100 in 1285
+    // 05   00000101 in 347K
+    // 04   00000100 in 1
+    // 03   00000011 in 26
+    // 02   00000010 in 220
+    // 01   00000001 in 2
+    // 00   00000000 in 1 iteration
+    uint8_t i=0;
     c011_init();
     c011_reset();
     uint8_t read;
     int count=0;
+    bool good=true;
     while (true) {
-        printf ("W 0x%X ", i);
-        ret = c011_write_byte(i,200);
-        if (ret == -1) {
-            printf ("write timeout\n");
-            break;
-        }
-        ret = c011_read_byte(&read, 200);
-        if (ret == -1) {
-            printf ("read timeout\n");
-            break;
-        } else {        
-            printf ("R 0x%X ", read);
-            if (read != i) {
-                printf ("*E* write=0x%X read=0x%X\n",i,read);
+        c011_reset();
+        good = true;
+        for (count=0; count < 1000000 && good; count++) {
+            //printf ("W 0x%X ", i);
+            ret = c011_write_byte(i,200);
+            if (ret == -1) {
+                printf ("write timeout\n");
+                good = false;
                 break;
-            } else {
-                printf ("OK %d\n", count++);
+            }
+            ret = c011_read_byte(&read, 200);
+            if (ret == -1) {
+                printf ("read timeout\n");
+                good = false;
+                break;
+            } else {        
+                //printf ("R 0x%X ", read);
+                if (read != i) {
+                    //printf ("*E* write=0x%X read=0x%X\n",i,read);
+                    good = false;
+                    break;
+                } else {
+                    //printf ("OK %d\n", count++);
+                }
             }
         }
+        if (good) {
+            printf ("0x%X OK\n", i);
+        } else {
+            printf ("0x%X BAD after %d iterations\n",i,count);
+        }
+
+        i++;
         //if (i==0x18) i=0x38; else i=0x18;
         //i = ~i;
     }
