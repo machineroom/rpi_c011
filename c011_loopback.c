@@ -100,6 +100,9 @@ int test_random_byte_values (void) {
     c011_reset();
     uint8_t read;
     int count=0;
+    uint64_t start;
+    start = bcm2835_st_read();
+
     while (true) {
         uint8_t val = rand();
         ret = c011_write_byte(val,200);
@@ -119,7 +122,14 @@ int test_random_byte_values (void) {
             }
         }
         count++;
-        if (count%1000000==0) printf ("OK %dM\n",count/1000000);
+        if (count%1000000==0) {
+            uint64_t now = bcm2835_st_read();
+            //1M bytes Tx & Rx in uS
+            double bits = 8.0f * 1000000.0f * 2.0f;
+            double seconds = (double)(now-start)/1000000.0f;
+            printf ("%f Mbits/second\n",bits/seconds/1000000.0f);
+            start = now;
+        }
     }
     return 0;
 }
