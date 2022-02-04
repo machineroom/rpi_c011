@@ -63,10 +63,10 @@ void c011_dump_stats(const char *title) {
  */
 static inline void sleep_ns(int ns) {
     //scope timing with rpi4 shows this is good enough for the small sleeps required by C011
-    //for (int i=0; i < ns; i++) {
-    //    asm ("nop");
-   // }
-    bcm2835_delayMicroseconds(1);
+    for (int i=0; i < ns; i++) {
+        asm ("nop");
+    }
+    //bcm2835_delayMicroseconds(1);
 }
 
 static void set_control_pins(void) {
