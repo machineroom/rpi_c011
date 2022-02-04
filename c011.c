@@ -88,7 +88,7 @@ static inline void set_data_output_pins(void) {
         //bits 9-0 output (001)
         //%00001001001001001001001001001001
         //    0   9   2   4   9   2   4   9
-        bcm2835_peri_write (gpio_fsel, 0x09249249);
+        bcm2835_peri_write_nb (gpio_fsel, 0x09249249);
         data_pins_mode = OUTPUT;
     }
 }
@@ -96,7 +96,7 @@ static inline void set_data_output_pins(void) {
 static inline void set_data_input_pins(void) {
     if (data_pins_mode != INPUT) {
         //bits 9-0 input (000)
-        bcm2835_peri_write (gpio_fsel, 0);
+        bcm2835_peri_write_nb (gpio_fsel, 0);
         data_pins_mode = INPUT;
     }
 }
@@ -114,8 +114,8 @@ static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
 // bcm2835_peri_write ~75ns
 // bcm2835_peri_write_nb ~5ns
 static inline void gpio_commit(void) {
-    bcm2835_peri_write (gpio_clr, ~bits);
-    bcm2835_peri_write (gpio_set, bits);
+    bcm2835_peri_write_nb (gpio_clr, ~bits);
+    bcm2835_peri_write_nb (gpio_set, bits);
 }
 
 //write byte to whatever register has been setup previously
