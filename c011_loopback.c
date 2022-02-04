@@ -127,7 +127,7 @@ int test_random_byte_values (void) {
             //1M bytes Tx & Rx in uS
             double bits = 8.0f * 1000000.0f * 2.0f;
             double seconds = (double)(now-start)/1000000.0f;
-            printf ("%f Mbits/second\n",bits/seconds/1000000.0f);
+            printf ("%f Mbits/second (total %dM bytes)\n",bits/seconds/1000000.0f, count/1000000);
             start = now;
         }
     }
