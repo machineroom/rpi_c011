@@ -1,5 +1,6 @@
 [General]
 decode_signals=0
+generated_signals=0
 meta_objs=1
 views=1
 
@@ -25,25 +26,25 @@ enabled=true
 name=link
 
 [11]
-color=4287582722
-conv_options=0
-conversion_type=0
-enabled=false
-name=11
-
-[12]
-color=4291559424
-conv_options=0
-conversion_type=0
-enabled=false
-name=12
-
-[13]
 color=4294277376
 conv_options=0
 conversion_type=0
-enabled=false
-name=13
+enabled=true
+name=clock
+
+[12]
+color=4294764879
+conv_options=0
+conversion_type=0
+enabled=true
+name=5V
+
+[13]
+color=4285780502
+conv_options=0
+conversion_type=0
+enabled=true
+name=byte
 
 [14]
 color=4293776384
@@ -117,8 +118,8 @@ name=inInt
 
 [meta_obj0]
 assoc_view=0
-end_time=22 serialization::archive 18 0 0 0 0 23074 0 3259 33724454 33033135 33990410 -8 0 0 6
-start_time=22 serialization::archive 18 0 0 0 0 23043 99999999 99995967 25364092 71970114 72373559 -8 0 0 6
+end_time=22 serialization::archive 17 0 0 0 0 0 0 0 0 0 0 0 0 0 6
+start_time=22 serialization::archive 17 0 0 0 0 0 0 0 0 0 0 0 0 0 6
 type=selection
 
 [view0]
@@ -138,9 +139,9 @@ type=selection
 7\trace_height=34
 8\trace_height=34
 9\trace_height=34
-offset=22 serialization::archive 18 0 0 0 0 705472 32837333 39545662 42381591 1600128 60483877 -8 0 0 6
-scale=1.3879608552600247e-07
+offset=22 serialization::archive 17 0 0 0 0 69030 91085161 86784628 95830163 27826822 58027515 -8 0 0 6
+scale=3.1229119243350557e-07
 segment_display_mode=3
-splitter_state=@ByteArray(\0\0\0\xff\0\0\0\x1\0\0\0\x2\0\0\0_\0\0\x4\xe0\x1\0\0\0\x1\x1\0\0\0\x1\0)
-v_offset=3
-zero_offset=22 serialization::archive 18 0 0 0 0 0 0 0 0 0 0 0 0 0 6
+splitter_state=@ByteArray(\0\0\0\xff\0\0\0\x1\0\0\0\x2\0\0\0W\0\0\x5\x42\x1\0\0\0\x1\x1\0\0\0\x1\0)
+v_offset=109
+zero_offset=22 serialization::archive 17 0 0 0 0 0 0 0 0 0 0 0 0 0 6
