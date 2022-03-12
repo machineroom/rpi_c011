@@ -3,7 +3,7 @@
  */
 
 // POWER IS CRITICAL! without good 3V3 and 5V feeds to the TXS0108 suffer random power drops for certain byte values...  
-
+// Also critical is short connection between c011 and Pi else TXS0108 glitch and go into reverse drive occasionally
 
 #include <stdint.h>
 #include <unistd.h>
@@ -16,13 +16,14 @@
 #include <linux/types.h>
 #include <stdbool.h>
 #include <time.h>
+#include <bcm2835.h>
+
 #include "c011.h"
+
 
 int test_all_byte_values(void) {
     int ret;
     uint8_t i=0;
-    c011_init();
-    c011_reset();
     uint8_t read;
     int count=0;
     bool good=true;
@@ -66,8 +67,6 @@ int test_all_byte_values(void) {
 
 int test_single_byte_value (uint8_t val) {
     int ret;
-    c011_init();
-    c011_reset();
     uint8_t read;
     int count=0;
     while (true) {
@@ -96,8 +95,6 @@ int test_single_byte_value (uint8_t val) {
 
 int test_random_byte_values (void) {
     int ret;
-    c011_init();
-    c011_reset();
     uint8_t read;
     int count=0;
     uint64_t start;
@@ -107,15 +104,18 @@ int test_random_byte_values (void) {
         uint8_t val = rand();
         ret = c011_write_byte(val,200);
         if (ret == -1) {
+            c011_set_byte_mode();
             printf ("write timeout\n");
             break;
         }
         ret = c011_read_byte(&read, 200);
         if (ret == -1) {
+            c011_set_byte_mode();
             printf ("read timeout\n");
             break;
         } else {        
             if (read != val) {
+                c011_set_byte_mode();
                 printf ("*E* write=0x%X read=0x%X\n",val,read);
                 break;
             } else {
@@ -136,7 +136,11 @@ int test_random_byte_values (void) {
 
 int main(int argc, char *argv[])
 {
-    return test_random_byte_values();
+    c011_init();
+    c011_reset();
+
+    c011_clear_byte_mode();
+    test_random_byte_values();
 //    return test_all_byte_values();
 //    return test_single_byte_value(0x40);
 }

@@ -171,9 +171,6 @@ void c011_init(void) {
 }
 
 void c011_reset(void) {
-    c011_set_byte_mode();           //enable BYTE mode on WX9020 by default
-    //set_gpio_bit(ANALYSE, LOW);
-    //gpio_commit();
     //TN29 states "Recommended pulse width is 5 ms, with a delay of 5 ms before sending anything down a link."
     set_gpio_bit(RESET, LOW);
     gpio_commit();
