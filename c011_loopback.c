@@ -2,9 +2,6 @@
   Test C011 (mode2) loopback. Loop LinkIn-LinkOut on C011
  */
 
-// POWER IS CRITICAL! without good 3V3 and 5V feeds to the TXS0108 suffer random power drops for certain byte values...  
-// Also critical is short connection between c011 and Pi else TXS0108 glitch and go into reverse drive occasionally
-
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -141,6 +138,6 @@ int main(int argc, char *argv[])
 
     c011_clear_byte_mode();
     test_random_byte_values();
-//    return test_all_byte_values();
-//    return test_single_byte_value(0x40);
+//    test_all_byte_values();
+//    test_single_byte_value(0x40);
 }
