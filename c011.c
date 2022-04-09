@@ -3,9 +3,11 @@
 
 #include <bcm2835.h>
 #include <time.h>
+#include <stdio.h>
+#include <assert.h>
+#include <stdbool.h>
 #include "pins.h"
 #include "c011.h"
-#include <stdio.h>
 
 
 #define TCSLCSH (50)
@@ -69,38 +71,6 @@ static inline void sleep_ns(int ns) {
     //bcm2835_delayMicroseconds(1);
 }
 
-static void set_control_pins(void) {
-    bcm2835_gpio_fsel(RS0, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_gpio_fsel(RS1, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_gpio_fsel(RESET, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_gpio_fsel(CS, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_gpio_fsel(RW, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_gpio_fsel(BYTE, BCM2835_GPIO_FSEL_OUTP);
-
-    bcm2835_gpio_fsel(IN_INT, BCM2835_GPIO_FSEL_INPT);
-    bcm2835_gpio_fsel(OUT_INT, BCM2835_GPIO_FSEL_INPT);
-    bcm2835_gpio_set_pud(IN_INT, BCM2835_GPIO_PUD_DOWN);
-    bcm2835_gpio_set_pud(OUT_INT, BCM2835_GPIO_PUD_DOWN);
-}
-
-static inline void set_data_output_pins(void) {
-    if (data_pins_mode != OUTPUT) {
-        //bits 9-0 output (001)
-        //%00001001001001001001001001001001
-        //    0   9   2   4   9   2   4   9
-        bcm2835_peri_write_nb (gpio_fsel, 0x09249249);
-        data_pins_mode = OUTPUT;
-    }
-}
-
-static inline void set_data_input_pins(void) {
-    if (data_pins_mode != INPUT) {
-        //bits 9-0 input (000)
-        bcm2835_peri_write_nb (gpio_fsel, 0);
-        data_pins_mode = INPUT;
-    }
-}
-
 //testing with scope shows set_gpio_bit takes ~6ns
 static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
     if (on) {
@@ -116,6 +86,46 @@ static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
 static inline void gpio_commit(void) {
     bcm2835_peri_write_nb (gpio_clr, ~bits);
     bcm2835_peri_write_nb (gpio_set, bits);
+}
+
+static void set_control_pins(void) {
+    bcm2835_gpio_fsel(RS0, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(RS1, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(RESET, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(CS, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(RW, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(BYTE, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(BYTE_DIR, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_fsel(INTFC_OE, BCM2835_GPIO_FSEL_OUTP);
+
+    bcm2835_gpio_fsel(IN_INT, BCM2835_GPIO_FSEL_INPT);
+    bcm2835_gpio_fsel(OUT_INT, BCM2835_GPIO_FSEL_INPT);
+    bcm2835_gpio_set_pud(IN_INT, BCM2835_GPIO_PUD_DOWN);
+    bcm2835_gpio_set_pud(OUT_INT, BCM2835_GPIO_PUD_DOWN);
+}
+
+static inline void set_data_output_pins(void) {
+    // set the level shifters to be output
+    set_gpio_bit (BYTE_DIR, HIGH);
+    gpio_commit();
+    if (data_pins_mode != OUTPUT) {
+        //bits 9-0 output (001)
+        //%00001001001001001001001001001001
+        //    0   9   2   4   9   2   4   9
+        bcm2835_peri_write_nb (gpio_fsel, 0x09249249);
+        data_pins_mode = OUTPUT;
+    }
+}
+
+static inline void set_data_input_pins(void) {
+    // set the level shifters to be input
+    set_gpio_bit (BYTE_DIR, LOW);
+    gpio_commit();
+    if (data_pins_mode != INPUT) {
+        //bits 9-0 input (000)
+        bcm2835_peri_write_nb (gpio_fsel, 0);
+        data_pins_mode = INPUT;
+    }
 }
 
 //write byte to whatever register has been setup previously
@@ -164,8 +174,8 @@ void c011_init(void) {
     gpio_lev = bcm2835_regbase(BCM2835_REGBASE_GPIO) + BCM2835_GPLEV0/4;
     set_control_pins();
     set_gpio_bit(CS, HIGH);
+    set_gpio_bit(INTFC_OE, LOW);   // enable the level shifters (!OE pin on 74LVC8T245)
 
-    //set_gpio_bit(ANALYSE, LOW);
     gpio_commit();
 
 }
@@ -200,21 +210,7 @@ void c011_clear_byte_mode(void) {
 }
 
 void c011_analyse(void) {
-    /*set_gpio_bit(ANALYSE, LOW);
-    gpio_commit();
-    bcm2835_delayMicroseconds (5*1000);
-    set_gpio_bit(ANALYSE, HIGH);
-    gpio_commit();
-    bcm2835_delayMicroseconds (5*1000);
-    set_gpio_bit(RESET, HIGH);
-    gpio_commit();
-    bcm2835_delayMicroseconds (5*1000);
-    set_gpio_bit(RESET, LOW);
-    gpio_commit();
-    bcm2835_delayMicroseconds (5*1000);
-    set_gpio_bit(ANALYSE, LOW);
-    gpio_commit();
-    bcm2835_delayMicroseconds (5*1000);*/
+    assert(true);
 }
 
 /**
