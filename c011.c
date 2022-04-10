@@ -105,10 +105,10 @@ static void set_control_pins(void) {
 }
 
 static inline void set_data_output_pins(void) {
-    // set the level shifters to be output
-    set_gpio_bit (BYTE_DIR, HIGH);
-    gpio_commit();
     if (data_pins_mode != OUTPUT) {
+        // set the level shifters to be output
+        set_gpio_bit (BYTE_DIR, HIGH);
+        gpio_commit();
         //bits 9-0 output (001)
         //%00001001001001001001001001001001
         //    0   9   2   4   9   2   4   9
@@ -118,10 +118,10 @@ static inline void set_data_output_pins(void) {
 }
 
 static inline void set_data_input_pins(void) {
-    // set the level shifters to be input
-    set_gpio_bit (BYTE_DIR, LOW);
-    gpio_commit();
     if (data_pins_mode != INPUT) {
+        // set the level shifters to be input
+        set_gpio_bit (BYTE_DIR, LOW);
+        gpio_commit();
         //bits 9-0 input (000)
         bcm2835_peri_write_nb (gpio_fsel, 0);
         data_pins_mode = INPUT;
