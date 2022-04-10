@@ -313,3 +313,22 @@ uint32_t c011_read_bytes (uint8_t *bytes, uint32_t num, uint32_t timeout) {
     return i;
 }
 
+uint8_t c011_read_input_status(void) {
+    uint8_t byte;
+    set_gpio_bit (RS1,1);
+    set_gpio_bit (RS0,0);
+    set_gpio_bit (RW,1);
+    gpio_commit();
+    byte = read_c011();
+    return byte;
+}
+
+uint8_t c011_read_output_status(void) {
+    uint8_t byte;
+    set_gpio_bit (RS1,1);
+    set_gpio_bit (RS0,1);
+    set_gpio_bit (RW,1);
+    gpio_commit();
+    byte = read_c011();
+    return byte;
+}
