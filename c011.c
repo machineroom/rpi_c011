@@ -221,14 +221,12 @@ void c011_analyse(void) {
  * @return int -1 on timeout or 0 on success
  */
 int c011_write_byte(uint8_t byte, uint32_t timeout) {
-    //wait for output ready
-    uint32_t word;
     total_writes++;
-    // wait for OutputInt pin to go high (thereby indicating ready to write)
+    //wait for OutputInt pin to go high (thereby indicating ready to write)
     uint64_t timeout_us = timeout*1000;    // 1000us=1ms
     uint64_t start;
     start = bcm2835_st_read();
-    while (((bcm2835_peri_read(gpio_lev) & (1<<OUT_INT)) == 0)) {
+    while (((bcm2835_peri_read_nb(gpio_lev) & (1<<OUT_INT)) == 0)) {
         if (bcm2835_st_read() - start > timeout_us) {
             total_write_timeouts++;
             return -1;
@@ -272,14 +270,14 @@ int c011_read_byte(uint8_t *byte, uint32_t timeout) {
     total_reads++;
     // wait for InputInt bit to go high
     if (timeout==0) {
-        while ((bcm2835_peri_read(gpio_lev) & (1<<IN_INT)) == 0) {
+        while ((bcm2835_peri_read_nb(gpio_lev) & (1<<IN_INT)) == 0) {
             total_read_waits++;
         }
     } else {
         uint64_t timeout_us = timeout*1000;    // 1000us=1ms
         uint64_t start;
         start = bcm2835_st_read();
-        while (((bcm2835_peri_read(gpio_lev) & (1<<IN_INT)) == 0)) {
+        while (((bcm2835_peri_read_nb(gpio_lev) & (1<<IN_INT)) == 0)) {
             if (bcm2835_st_read() - start > timeout_us) {
                 total_read_timeouts++;
                 return -1;
