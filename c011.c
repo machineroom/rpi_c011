@@ -141,11 +141,9 @@ static void c011_put_byte(uint8_t byte) {
     //CS=0
     set_gpio_bit(CS, LOW);
     gpio_commit();
-    sleep_ns (TCSLCSH);
     //CS=1
     set_gpio_bit(CS, HIGH);
     gpio_commit();
-    sleep_ns (TCSHCSL);
 }
 
 static void c011_enable_in_int(void) {
@@ -247,15 +245,14 @@ static uint8_t read_c011(void) {
     set_data_input_pins();
     set_gpio_bit(CS, LOW);
     gpio_commit();
-    //must allow time for data valid after !CS
-    sleep_ns (TCSLDrV);
-    uint32_t reg = bcm2835_peri_read (gpio_lev);
+    //should allow time for data valid after !CS (the code is slow enough for this to not be required?!)
+    //sleep_ns (TCSLDrV);
+    uint32_t reg = bcm2835_peri_read_nb (gpio_lev);
     uint8_t byte;
     reg >>= 2;
-    byte = reg & 0xFF;
+    byte = reg;
     set_gpio_bit(CS, HIGH);
     gpio_commit();
-    sleep_ns (TCSHCSL);
     return byte;
 }
 

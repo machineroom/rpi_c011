@@ -131,13 +131,54 @@ int test_random_byte_values (void) {
     return 0;
 }
 
+int test_perf (void) {
+    int ret;
+    uint8_t read;
+    int count=0;
+    uint64_t start;
+    start = bcm2835_st_read();
+
+    uint8_t val = 0x55;
+    while (true) {
+        ret = c011_write_byte(val,200);
+        if (ret == -1) {
+            c011_set_byte_mode();
+            printf ("write timeout\n");
+            break;
+        }
+        ret = c011_read_byte(&read, 0);
+        if (ret == -1) {
+            c011_set_byte_mode();
+            printf ("read timeout\n");
+            break;
+        } else {        
+            if (read != val) {
+                c011_set_byte_mode();
+                printf ("*E* write=0x%X read=0x%X\n",val,read);
+                break;
+            } else {
+            }
+        }
+        count++;
+        if (count%1000000==0) {
+            uint64_t now = bcm2835_st_read();
+            //1M bytes Tx & Rx in uS
+            double bits = 8.0f * 1000000.0f * 2.0f;
+            double seconds = (double)(now-start)/1000000.0f;
+            printf ("%f Mbits/second (total %dM bytes)\n",bits/seconds/1000000.0f, count/1000000);
+            start = now;
+        }
+    }
+    return 0;
+}
 int main(int argc, char *argv[])
 {
     c011_init();
     c011_reset();
 
     c011_clear_byte_mode();
-    test_random_byte_values();
-//    test_all_byte_values();
-//    test_single_byte_value(0x40);
+    test_perf();
+    //test_random_byte_values();
+    //test_all_byte_values();
+    //test_single_byte_value(0x40);
 }
