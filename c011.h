@@ -30,4 +30,4 @@ extern void c011_clear_byte_mode(void);
 
 extern uint8_t c011_read_input_status(void);
 
-extern uint8_t c011_read_outut_status(void);
+extern uint8_t c011_read_output_status(void);
