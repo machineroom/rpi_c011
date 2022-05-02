@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
 	int ret = 0;
 	c011_init();
     c011_reset();
+    c011_set_byte_mode();
+
 //    c011_analyse();
     //blatant copy from https://github.com/hessch/rpilink/blob/master/utils/tdetect.py
     // & http://www.geekdot.com/category/software/transputer-software/ (iTest)
