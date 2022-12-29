@@ -187,9 +187,6 @@ void c011_reset(void) {
     bcm2835_delayMicroseconds (5*1000);
     set_gpio_bit(RESET, LOW);
     gpio_commit();
-    bcm2835_delayMicroseconds (5*1000);
-    //The whitecross HSL takes some time to cascade reset
-    //bcm2835_delay(1500);
     c011_enable_in_int();
     c011_enable_out_int();
 }
