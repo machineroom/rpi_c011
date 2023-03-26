@@ -70,7 +70,10 @@ int main(int argc, char *argv[])
              0x21, 0xF8,                                /* STLF                           */
              0xF0,                                      /* REV                            */
              0x60, 0x5C,                                /* LDNLP -4                       */
-             0x2A, 0x2A, 0x2A, 0x4A,                       /* LDC #AAAA                      */
+             0x2A, 0x2A, 0x2A, 0x4A,                    /* LDC #AAAA                      */
+             0xFF,                                      /* OUTWORD                        */
+             0x60, 0x5C,                                /* LDNLP -4                       */
+             0x21, 0x27, 0xFC,                          /* LDDEVID                        */
              0xFF,                                      /* OUTWORD                        */
              0x21, 0x2F, 0xFF                           /* START                          */
              };  
@@ -110,6 +113,8 @@ int main(int argc, char *argv[])
     num = c011_read_bytes (rx, sizeof(rx), 200);
     printf ("num read = %u, expect [AA AA 00 00 xx xx] reply = [%02X %02X %02X %02X %02X %02X]\n", num, rx[0], rx[1], rx[2], rx[3], rx[4], rx[5]);
     //c011_dump_stats ("read result");
+    num = c011_read_bytes (rx, sizeof(rx), 200);
+    printf ("num reaD = %u, devid [%02X %02X %02X %02X %02X %02X]\n", num, rx[0], rx[1], rx[2], rx[3], rx[4], rx[5]);
 #endif
 	return ret;
 }
