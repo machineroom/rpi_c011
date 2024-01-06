@@ -4,6 +4,8 @@
 // RP1 chip as used on pi5
 #define RP1
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <bcm2835.h>
 #include <time.h>
 #include <stdio.h>
@@ -29,6 +31,9 @@ extern "C" {
 
 static uint32_t bits=0;
 #ifdef RP1
+static int gpio_bank, gpio_offset;
+static volatile uint32_t *gpio_base;
+
 #else
 static volatile uint32_t *gpio_clr;
 static volatile uint32_t *gpio_set;
@@ -53,6 +58,12 @@ static uint64_t total_writes=0;
 static uint64_t total_write_waits=0;
 static uint64_t total_write_timeouts=0;
 static uint64_t total_write_success=0;
+
+static uint64_t get_ns() {
+    struct timespec spec;
+    clock_gettime (CLOCK_REALTIME, &spec);
+    return spec.tv_sec * 1000000 + spec.tv_nsec;
+}
 
 void c011_dump_stats(const char *title) {
     printf ("C011 interfaces stats for '%s'\n",title);
@@ -101,15 +112,7 @@ static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
 // bcm2835_peri_write_nb ~5ns
 static inline void gpio_commit(void) {
 #ifdef RP1
-    unsigned gpio_offset;
-    void *priv;
-    const GPIO_CHIP_INTERFACE_T *iface = NULL;
-    gpio_get_interface(D0, &iface, &priv, &gpio_offset);
-    volatile uint32_t *base = (volatile uint32_t *)priv;
-    int bank, offset;
-
-    rp1_gpio_get_bank(D0, &bank, &offset);
-    rp1_gpio_sys_rio_out_write(base, bank, offset, bits);
+   rp1_gpio_sys_rio_out_write(gpio_base, gpio_bank, gpio_offset, bits);
 #else
     bcm2835_peri_write_nb (gpio_clr, ~bits);
     bcm2835_peri_write_nb (gpio_set, bits);
@@ -249,18 +252,15 @@ void c011_init(void) {
 #ifdef RP1
     gpiolib_set_verbose(&verbose_callback);
     int ret = gpiolib_init();
-    unsigned int gpio = 14;
+    unsigned int gpio = D0;
     ret = gpiolib_mmap();
+
     unsigned gpio_offset;
     void *priv;
     const GPIO_CHIP_INTERFACE_T *iface = NULL;
     gpio_get_interface(gpio, &iface, &priv, &gpio_offset);
-    volatile uint32_t *base = (volatile uint32_t *)priv;
-    uint32_t reg;
-    int bank, offset;
-
-    rp1_gpio_get_bank(gpio, &bank, &offset);
-    reg = rp1_gpio_sys_rio_out_read(base, bank, offset);
+    gpio_base = (volatile uint32_t *)priv;
+    rp1_gpio_get_bank(gpio, &gpio_bank, &gpio_offset);
 
 #if 0
     while (1) {
@@ -361,15 +361,7 @@ static uint8_t read_c011(void) {
     //sleep_ns (TCSLDrV);
     uint32_t reg = 0;
 #ifdef RP1
-    unsigned gpio_offset;
-    void *priv;
-    const GPIO_CHIP_INTERFACE_T *iface = NULL;
-    gpio_get_interface(D0, &iface, &priv, &gpio_offset);
-    volatile uint32_t *base = (volatile uint32_t *)priv;
-    int bank, offset;
-
-    rp1_gpio_get_bank(D0, &bank, &offset);
-    reg = rp1_gpio_sys_rio_out_read(base, bank, offset);
+    reg = rp1_gpio_sys_rio_out_read(gpio_base, gpio_bank, gpio_offset);
 #else
     reg = bcm2835_peri_read_nb (gpio_lev);
 #endif

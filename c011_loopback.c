@@ -15,10 +15,14 @@
 #include <linux/types.h>
 #include <stdbool.h>
 #include <time.h>
-#include <bcm2835.h>
 
 #include "c011.h"
 
+static uint64_t get_ns() {
+    struct timespec spec;
+    clock_gettime (CLOCK_REALTIME, &spec);
+    return spec.tv_sec * 1000000 + spec.tv_nsec;
+}
 
 int test_all_byte_values(void) {
     int ret;
@@ -101,7 +105,7 @@ int test_alternating_byte_value (uint8_t val) {
     uint8_t read;
     int count=0;
     uint64_t start;
-    start = bcm2835_st_read();
+    start = get_ns();
     while (true) {
         ret = c011_write_byte(val,200);
         if (ret == -1) {
@@ -122,7 +126,7 @@ int test_alternating_byte_value (uint8_t val) {
             }
             count++;
             if (count%1000000==0) {
-                uint64_t now = bcm2835_st_read();
+                uint64_t now = get_ns();
                 //1M bytes Tx & Rx in uS
                 double bits = 8.0f * 1000000.0f * 2.0f;
                 double seconds = (double)(now-start)/1000000.0f;
@@ -140,7 +144,7 @@ int test_random_byte_values (void) {
     uint8_t read;
     int count=0;
     uint64_t start;
-    start = bcm2835_st_read();
+    start = get_ns();
 
     while (true) {
         uint8_t val = rand();
@@ -165,7 +169,7 @@ int test_random_byte_values (void) {
         }
         count++;
         if (count%1000000==0) {
-            uint64_t now = bcm2835_st_read();
+            uint64_t now = get_ns();
             //1M bytes Tx & Rx in uS
             double bits = 8.0f * 1000000.0f * 2.0f;
             double seconds = (double)(now-start)/1000000.0f;
@@ -174,12 +178,6 @@ int test_random_byte_values (void) {
         }
     }
     return 0;
-}
-
-uint64_t get_ns() {
-    struct timespec spec;
-    clock_gettime (CLOCK_REALTIME, &spec);
-    return spec.tv_sec * 1000000 + spec.tv_nsec;
 }
 
 int test_perf (void) {
