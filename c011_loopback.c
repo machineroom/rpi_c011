@@ -2,6 +2,8 @@
   Test C011 (mode2) loopback. Loop LinkIn-LinkOut on C011
  */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -174,12 +176,18 @@ int test_random_byte_values (void) {
     return 0;
 }
 
+uint64_t get_ns() {
+    struct timespec spec;
+    clock_gettime (CLOCK_REALTIME, &spec);
+    return spec.tv_sec * 1000000 + spec.tv_nsec;
+}
+
 int test_perf (void) {
     int ret;
     uint8_t read;
     int count=0;
     uint64_t start;
-    start = bcm2835_st_read();
+    start = get_ns();
 
     uint8_t val = 0x55;
     while (true) {
@@ -204,7 +212,7 @@ int test_perf (void) {
         }
         count++;
         if (count%1000000==0) {
-            uint64_t now = bcm2835_st_read();
+            uint64_t now = get_ns();
             //1M bytes Tx & Rx in uS
             double bits = 8.0f * 1000000.0f * 2.0f;
             double seconds = (double)(now-start)/1000000.0f;
