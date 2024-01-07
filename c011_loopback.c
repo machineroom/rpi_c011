@@ -226,9 +226,9 @@ int main(int argc, char *argv[])
     c011_reset();
 
     c011_clear_byte_mode();
-    test_perf();
+    //test_perf();
     //test_random_byte_values();
-    //test_alternating_byte_value(0x00);
+    test_alternating_byte_value(0x00);
     //test_all_byte_values();
     //test_single_byte_value(0x40);
 }

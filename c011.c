@@ -58,12 +58,6 @@ static uint64_t total_write_waits=0;
 static uint64_t total_write_timeouts=0;
 static uint64_t total_write_success=0;
 
-static uint64_t get_ns() {
-    struct timespec spec;
-    clock_gettime (CLOCK_REALTIME, &spec);
-    return spec.tv_sec * 1000000 + spec.tv_nsec;
-}
-
 void c011_dump_stats(const char *title) {
     printf ("C011 interfaces stats for '%s'\n",title);
     printf ("\ttotal reads %lu\n",total_reads);
@@ -96,7 +90,7 @@ static inline void sleep_ns(int ns) {
     }
 }
 
-//testing with scope shows set_gpio_bit takes ~6ns
+//testing with scope shows set_gpio_bit takes ~6ns (rpi4)
 static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
     if (on) {
         bits |= 1<<pin;
@@ -160,14 +154,8 @@ static inline void set_data_output_pins(void) {
         //%00001001001001001001001001001001
         //    0   9   2   4   9   2   4   9
 #ifdef RP1
-        gpio_set_fsel(D0, GPIO_FSEL_OUTPUT);
-        gpio_set_fsel(D1, GPIO_FSEL_OUTPUT);
-        gpio_set_fsel(D2, GPIO_FSEL_OUTPUT);
-        gpio_set_fsel(D3, GPIO_FSEL_OUTPUT);
-        gpio_set_fsel(D4, GPIO_FSEL_OUTPUT);
-        gpio_set_fsel(D5, GPIO_FSEL_OUTPUT);
-        gpio_set_fsel(D6, GPIO_FSEL_OUTPUT);
-        gpio_set_fsel(D7, GPIO_FSEL_OUTPUT);
+        // bits 9-2 input (0)
+        rp1_gpio_sys_rio_oe_set_word(gpio_base, gpio_bank, 0x3FC);
 #else
         bcm2835_peri_write_nb (gpio_fsel, 0x09249249);
 #endif
@@ -181,14 +169,8 @@ static inline void set_data_input_pins(void) {
         set_gpio_bit (BYTE_DIR, LOW);
         gpio_commit();
 #ifdef RP1
-        gpio_set_fsel(D0, GPIO_FSEL_INPUT);
-        gpio_set_fsel(D1, GPIO_FSEL_INPUT);
-        gpio_set_fsel(D2, GPIO_FSEL_INPUT);
-        gpio_set_fsel(D3, GPIO_FSEL_INPUT);
-        gpio_set_fsel(D4, GPIO_FSEL_INPUT);
-        gpio_set_fsel(D5, GPIO_FSEL_INPUT);
-        gpio_set_fsel(D6, GPIO_FSEL_INPUT);
-        gpio_set_fsel(D7, GPIO_FSEL_INPUT);
+        // bits 9-2 input (0)
+        rp1_gpio_sys_rio_oe_clr_word(gpio_base, gpio_bank, 0x3FC);
 #else
         //bits 9-0 input (000)
         bcm2835_peri_write_nb (gpio_fsel, 0);

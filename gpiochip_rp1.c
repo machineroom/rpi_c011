@@ -209,14 +209,28 @@ static uint32_t rp1_gpio_sys_rio_oe_read(volatile uint32_t *base, int bank)
                            RP1_GPIO_SYS_RIO_REG_OE_OFFSET);
 }
 
-static void rp1_gpio_sys_rio_oe_clr(volatile uint32_t *base, int bank, int offset)
+void rp1_gpio_sys_rio_oe_clr_word(volatile uint32_t *base, int bank, uint32_t word)
+{
+    rp1_gpio_write32(base, gpio_state.sys_rio[bank],
+                     RP1_GPIO_SYS_RIO_REG_OE_OFFSET + RP1_CLR_OFFSET,
+                     word);
+}
+
+void rp1_gpio_sys_rio_oe_clr(volatile uint32_t *base, int bank, int offset)
 {
     rp1_gpio_write32(base, gpio_state.sys_rio[bank],
                      RP1_GPIO_SYS_RIO_REG_OE_OFFSET + RP1_CLR_OFFSET,
                      1U << offset);
 }
 
-static void rp1_gpio_sys_rio_oe_set(volatile uint32_t *base, int bank, int offset)
+void rp1_gpio_sys_rio_oe_set_word(volatile uint32_t *base, int bank, uint32_t word)
+{
+    rp1_gpio_write32(base, gpio_state.sys_rio[bank],
+                     RP1_GPIO_SYS_RIO_REG_OE_OFFSET + RP1_SET_OFFSET,
+                     word);
+}
+
+void rp1_gpio_sys_rio_oe_set(volatile uint32_t *base, int bank, int offset)
 {
     rp1_gpio_write32(base, gpio_state.sys_rio[bank],
                      RP1_GPIO_SYS_RIO_REG_OE_OFFSET + RP1_SET_OFFSET,
