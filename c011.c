@@ -262,17 +262,6 @@ void c011_init(void) {
     gpio_base = (volatile uint32_t *)priv;
     rp1_gpio_get_bank(gpio, &gpio_bank, &gpio_offset);
 
-#if 0
-    while (1) {
-        reg = 0x4000;   //GPIO14
-        rp1_gpio_sys_rio_out_write(base, bank, offset, reg);
-        sleep_ns (500);
-        reg = 0;
-        rp1_gpio_sys_rio_out_write(base, bank, offset, reg);
-        sleep_ns (500);
-    }
-    exit(0);
-#endif
 #else
     bcm2835_init();
     gpio_clr = bcm2835_regbase(BCM2835_REGBASE_GPIO) + BCM2835_GPCLR0/4;

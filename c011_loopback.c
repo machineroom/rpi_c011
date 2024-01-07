@@ -18,10 +18,10 @@
 
 #include "c011.h"
 
-static uint64_t get_ns() {
+static uint64_t get_ms() {
     struct timespec spec;
     clock_gettime (CLOCK_REALTIME, &spec);
-    return spec.tv_sec * 1000000 + spec.tv_nsec;
+    return spec.tv_sec * 1000 + spec.tv_nsec/1000000;
 }
 
 int test_all_byte_values(void) {
@@ -105,7 +105,7 @@ int test_alternating_byte_value (uint8_t val) {
     uint8_t read;
     int count=0;
     uint64_t start;
-    start = get_ns();
+    start = get_ms();
     while (true) {
         ret = c011_write_byte(val,200);
         if (ret == -1) {
@@ -126,11 +126,11 @@ int test_alternating_byte_value (uint8_t val) {
             }
             count++;
             if (count%1000000==0) {
-                uint64_t now = get_ns();
-                //1M bytes Tx & Rx in uS
-                double bits = 8.0f * 1000000.0f * 2.0f;
-                double seconds = (double)(now-start)/1000000.0f;
-                printf ("%f Mbits/second (total %dM bytes)\n",bits/seconds/1000000.0f, count/1000000);
+                uint64_t now = get_ms();
+                //1M bytes *8 for bits * 2 for Tx & Rx
+                double mbits = 8.0f * 2.0f;
+                double per_second = (double)1000.0f/(now-start);
+                printf ("%0.1f Mbits/second (total %dM bytes)\n",per_second*mbits, count/1000000);
                 start = now;
             }
         }
@@ -144,7 +144,7 @@ int test_random_byte_values (void) {
     uint8_t read;
     int count=0;
     uint64_t start;
-    start = get_ns();
+    start = get_ms();
 
     while (true) {
         uint8_t val = rand();
@@ -169,11 +169,11 @@ int test_random_byte_values (void) {
         }
         count++;
         if (count%1000000==0) {
-            uint64_t now = get_ns();
-            //1M bytes Tx & Rx in uS
-            double bits = 8.0f * 1000000.0f * 2.0f;
-            double seconds = (double)(now-start)/1000000.0f;
-            printf ("%f Mbits/second (total %dM bytes)\n",bits/seconds/1000000.0f, count/1000000);
+            uint64_t now = get_ms();
+            //1M bytes *8 for bits * 2 for Tx & Rx
+            double mbits = 8.0f * 2.0f;
+            double per_second = (double)1000.0f/(now-start);
+            printf ("%0.1f Mbits/second (total %dM bytes)\n",per_second*mbits, count/1000000);
             start = now;
         }
     }
@@ -185,7 +185,7 @@ int test_perf (void) {
     uint8_t read;
     int count=0;
     uint64_t start;
-    start = get_ns();
+    start = get_ms();
 
     uint8_t val = 0x55;
     while (true) {
@@ -210,11 +210,11 @@ int test_perf (void) {
         }
         count++;
         if (count%1000000==0) {
-            uint64_t now = get_ns();
-            //1M bytes Tx & Rx in uS
-            double bits = 8.0f * 1000000.0f * 2.0f;
-            double seconds = (double)(now-start)/1000000.0f;
-            printf ("%f Mbits/second (total %dM bytes)\n",bits/seconds/1000000.0f, count/1000000);
+            uint64_t now = get_ms();
+            //1M bytes *8 for bits * 2 for Tx & Rx
+            double mbits = 8.0f * 2.0f;
+            double per_second = (double)1000.0f/(now-start);
+            printf ("%0.1f Mbits/second (total %dM bytes)\n",per_second*mbits, count/1000000);
             start = now;
         }
     }
