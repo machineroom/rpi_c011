@@ -15,12 +15,12 @@
 #include "c011.h"
 
 #ifdef RP1
-#ifdef _CPLUSPLUS
+#ifdef __cplusplus
 extern "C" {
 #endif
     #include "gpiolib.h"
     #include "gpiochip_rp1.h"
-#ifdef _CPLUSPLUS
+#ifdef __cplusplus
 }
 #endif
 #endif
@@ -221,11 +221,11 @@ static void verbose_callback(const char *msg)
     printf("%s", msg);
 }
 
-#ifdef _CPLUSPLUS
+#ifdef __cplusplus
 extern "C" {
 #endif
     #include "gpiochip_rp1.h"
-#ifdef _CPLUSPLUS
+#ifdef __cplusplus
 }
 #endif
 
