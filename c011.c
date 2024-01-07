@@ -31,14 +31,13 @@ extern "C" {
 
 static uint32_t bits=0;
 #ifdef RP1
-static int gpio_bank, gpio_offset;
-static volatile uint32_t *gpio_base;
-
+    static int gpio_bank, gpio_offset;
+    static volatile uint32_t *gpio_base;
 #else
-static volatile uint32_t *gpio_clr;
-static volatile uint32_t *gpio_set;
-static volatile uint32_t *gpio_fsel;
-static volatile uint32_t *gpio_lev;
+    static volatile uint32_t *gpio_clr;
+    static volatile uint32_t *gpio_set;
+    static volatile uint32_t *gpio_fsel;
+    static volatile uint32_t *gpio_lev;
 #endif
 
 typedef enum {
@@ -95,7 +94,6 @@ static inline void sleep_ns(int ns) {
     for (int i=0; i < ns; i++) {
         asm ("nop");
     }
-    //bcm2835_delayMicroseconds(1);
 }
 
 //testing with scope shows set_gpio_bit takes ~6ns
@@ -107,13 +105,13 @@ static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
     }
 }
 
-//testing with scope shows gpio_commit takes ~150ns (rpi4 -O3)
-// bcm2835_peri_write ~75ns
-// bcm2835_peri_write_nb ~5ns
 static inline void gpio_commit(void) {
 #ifdef RP1
    rp1_gpio_sys_rio_out_write(gpio_base, gpio_bank, gpio_offset, bits);
 #else
+    //testing with scope shows gpio_commit takes ~150ns (rpi4 -O3)
+    // bcm2835_peri_write ~75ns
+    // bcm2835_peri_write_nb ~5ns
     bcm2835_peri_write_nb (gpio_clr, ~bits);
     bcm2835_peri_write_nb (gpio_set, bits);
 #endif
@@ -162,14 +160,14 @@ static inline void set_data_output_pins(void) {
         //%00001001001001001001001001001001
         //    0   9   2   4   9   2   4   9
 #ifdef RP1
-    gpio_set_fsel(D0, GPIO_FSEL_OUTPUT);
-    gpio_set_fsel(D1, GPIO_FSEL_OUTPUT);
-    gpio_set_fsel(D2, GPIO_FSEL_OUTPUT);
-    gpio_set_fsel(D3, GPIO_FSEL_OUTPUT);
-    gpio_set_fsel(D4, GPIO_FSEL_OUTPUT);
-    gpio_set_fsel(D5, GPIO_FSEL_OUTPUT);
-    gpio_set_fsel(D6, GPIO_FSEL_OUTPUT);
-    gpio_set_fsel(D7, GPIO_FSEL_OUTPUT);
+        gpio_set_fsel(D0, GPIO_FSEL_OUTPUT);
+        gpio_set_fsel(D1, GPIO_FSEL_OUTPUT);
+        gpio_set_fsel(D2, GPIO_FSEL_OUTPUT);
+        gpio_set_fsel(D3, GPIO_FSEL_OUTPUT);
+        gpio_set_fsel(D4, GPIO_FSEL_OUTPUT);
+        gpio_set_fsel(D5, GPIO_FSEL_OUTPUT);
+        gpio_set_fsel(D6, GPIO_FSEL_OUTPUT);
+        gpio_set_fsel(D7, GPIO_FSEL_OUTPUT);
 #else
         bcm2835_peri_write_nb (gpio_fsel, 0x09249249);
 #endif
@@ -183,14 +181,14 @@ static inline void set_data_input_pins(void) {
         set_gpio_bit (BYTE_DIR, LOW);
         gpio_commit();
 #ifdef RP1
-    gpio_set_fsel(D0, GPIO_FSEL_INPUT);
-    gpio_set_fsel(D1, GPIO_FSEL_INPUT);
-    gpio_set_fsel(D2, GPIO_FSEL_INPUT);
-    gpio_set_fsel(D3, GPIO_FSEL_INPUT);
-    gpio_set_fsel(D4, GPIO_FSEL_INPUT);
-    gpio_set_fsel(D5, GPIO_FSEL_INPUT);
-    gpio_set_fsel(D6, GPIO_FSEL_INPUT);
-    gpio_set_fsel(D7, GPIO_FSEL_INPUT);
+        gpio_set_fsel(D0, GPIO_FSEL_INPUT);
+        gpio_set_fsel(D1, GPIO_FSEL_INPUT);
+        gpio_set_fsel(D2, GPIO_FSEL_INPUT);
+        gpio_set_fsel(D3, GPIO_FSEL_INPUT);
+        gpio_set_fsel(D4, GPIO_FSEL_INPUT);
+        gpio_set_fsel(D5, GPIO_FSEL_INPUT);
+        gpio_set_fsel(D6, GPIO_FSEL_INPUT);
+        gpio_set_fsel(D7, GPIO_FSEL_INPUT);
 #else
         //bits 9-0 input (000)
         bcm2835_peri_write_nb (gpio_fsel, 0);
