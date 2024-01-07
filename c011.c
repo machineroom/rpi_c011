@@ -31,7 +31,8 @@ extern "C" {
 
 static uint32_t bits=0;
 #ifdef RP1
-    static int gpio_bank, gpio_offset;
+    static int gpio_bank;
+    static int gpio_offset;
     static volatile uint32_t *gpio_base;
 #else
     static volatile uint32_t *gpio_clr;
@@ -235,10 +236,10 @@ void c011_init(void) {
     unsigned int gpio = D0;
     ret = gpiolib_mmap();
 
-    unsigned gpio_offset;
     void *priv;
-    const GPIO_CHIP_INTERFACE_T *iface = NULL;
-    gpio_get_interface(gpio, &iface, &priv, &gpio_offset);
+    const GPIO_CHIP_INTERFACE_T *iface_ignored = NULL;
+    unsigned offset_ignored;
+    gpio_get_interface(gpio, &iface_ignored, &priv, &offset_ignored);
     gpio_base = (volatile uint32_t *)priv;
     rp1_gpio_get_bank(gpio, &gpio_bank, &gpio_offset);
 
