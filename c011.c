@@ -158,14 +158,15 @@ static inline void set_data_output_pins(void) {
         // set the level shifters to be output
         set_gpio_bit (BYTE_DIR, HIGH);
         gpio_commit();
-        //bits 9-0 output (001)
+#ifdef RP1
+        // bits 9-2 output (1)
+        uint32_t oe = rp1_gpio_sys_rio_oe_read(gpio_base, gpio_bank);
+        oe |= 0x3FC;
+        rp1_gpio_sys_rio_oe_set_word(gpio_base, gpio_bank, oe);
+#else
+        //bits 9-2 output (001)
         //%00001001001001001001001001001001
         //    0   9   2   4   9   2   4   9
-#ifdef RP1
-        // bits 9-2 input (0)
-        // TODO need to get current word first! to not clobber all nbits
-        rp1_gpio_sys_rio_oe_set_word(gpio_base, gpio_bank, 0x3FC);
-#else
         bcm2835_peri_write_nb (gpio_fsel, 0x09249249);
 #endif
         data_pins_mode = OUTPUT;
@@ -178,10 +179,11 @@ static inline void set_data_input_pins(void) {
         set_gpio_bit (BYTE_DIR, LOW);
         gpio_commit();
 #ifdef RP1
-        // bits 9-2 input (0)
-        rp1_gpio_sys_rio_oe_clr_word(gpio_base, gpio_bank, 0x3FC);
+        uint32_t oe = rp1_gpio_sys_rio_oe_read(gpio_base, gpio_bank);
+        oe &= ~0x3FC;
+        rp1_gpio_sys_rio_oe_set_word(gpio_base, gpio_bank, oe);
 #else
-        //bits 9-0 input (000)
+        //bits 9-2 input (000)
         bcm2835_peri_write_nb (gpio_fsel, 0);
         data_pins_mode = INPUT;
 #endif
