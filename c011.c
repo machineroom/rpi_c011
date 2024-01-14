@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include "pins.h"
 #include "c011.h"
 
@@ -91,6 +92,12 @@ static inline void sleep_ns(int ns) {
     }
 }
 
+static uint64_t get_ms() {
+    struct timespec spec;
+    clock_gettime (CLOCK_REALTIME, &spec);
+    return spec.tv_sec * 1000 + spec.tv_nsec/1000000;
+}
+
 //testing with scope shows set_gpio_bit takes ~6ns (rpi4)
 static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
     if (on) {
@@ -156,6 +163,7 @@ static inline void set_data_output_pins(void) {
         //    0   9   2   4   9   2   4   9
 #ifdef RP1
         // bits 9-2 input (0)
+        // TODO need to get current word first! to not clobber all nbits
         rp1_gpio_sys_rio_oe_set_word(gpio_base, gpio_bank, 0x3FC);
 #else
         bcm2835_peri_write_nb (gpio_fsel, 0x09249249);
@@ -263,6 +271,7 @@ void c011_reset(void) {
     gpio_commit();
     set_gpio_bit(RESET, HIGH);
     gpio_commit();
+    sleep(1);
 //    bcm2835_delayMicroseconds (5*1000);
     set_gpio_bit(RESET, LOW);
     gpio_commit();
@@ -274,6 +283,7 @@ void c011_set_byte_mode(void) {
     set_gpio_bit (BYTE,HIGH);
     gpio_commit();
 //    bcm2835_delay(1500);
+    sleep(2);
 }
 
 void c011_clear_byte_mode(void) {
@@ -281,6 +291,7 @@ void c011_clear_byte_mode(void) {
     gpio_commit();
     //The whitecross HSL takes some time to cascade
 //    bcm2835_delay(1500);
+    sleep(2);
 }
 
 void c011_analyse(void) {
@@ -297,13 +308,18 @@ void c011_analyse(void) {
 int c011_write_byte(uint8_t byte, uint32_t timeout) {
     total_writes++;
     //wait for OutputInt pin to go high (thereby indicating ready to write)
-    uint64_t timeout_us = timeout*1000;    // 1000us=1ms
     uint64_t start;
 #ifdef RP1
-    //while (((gpio_get_level(OUT_INT) & (1<<OUT_INT)) == 0)) {
-    //    total_write_waits++;
-    //}
+    start = get_ms();
+    while (((gpio_get_level(OUT_INT)) == 0)) {
+        if (get_ms() - start >  timeout) {
+            total_write_timeouts++;
+            return -1;
+        }
+        total_write_waits++;
+    }
 #else
+    uint64_t timeout_us = timeout*1000;    // 1000us=1ms
     start = bcm2835_st_read();
     while (((bcm2835_peri_read_nb(gpio_lev) & (1<<OUT_INT)) == 0)) {
         if (bcm2835_st_read() - start > timeout_us) {
@@ -355,16 +371,27 @@ int c011_read_byte(uint8_t *byte, uint32_t timeout) {
     // wait for InputInt bit to go high
     if (timeout==0) {
 #ifdef RP1
+        while (gpio_get_level(IN_INT) == 0) {
+            total_read_waits++;
+        }
 #else
         while ((bcm2835_peri_read_nb(gpio_lev) & (1<<IN_INT)) == 0) {
             total_read_waits++;
         }
 #endif
     } else {
-        uint64_t timeout_us = timeout*1000;    // 1000us=1ms
         uint64_t start;
 #ifdef RP1
+        start = get_ms();
+        while (((gpio_get_level(IN_INT)) == 0)) {
+            if (get_ms() - start >  timeout) {
+                total_read_timeouts++;
+                return -1;
+            }
+            total_read_waits++;
+        }
 #else
+        uint64_t timeout_us = timeout*1000;    // 1000us=1ms
         start = bcm2835_st_read();
         while (((bcm2835_peri_read_nb(gpio_lev) & (1<<IN_INT)) == 0)) {
             if (bcm2835_st_read() - start > timeout_us) {
