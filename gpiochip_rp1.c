@@ -203,7 +203,7 @@ void rp1_gpio_sys_rio_out_write(volatile uint32_t *base, int bank,
                      RP1_GPIO_SYS_RIO_REG_OUT_OFFSET, value);
 }
 
-static uint32_t rp1_gpio_sys_rio_oe_read(volatile uint32_t *base, int bank)
+uint32_t rp1_gpio_sys_rio_oe_read(volatile uint32_t *base, int bank)
 {
     return rp1_gpio_read32(base, gpio_state.sys_rio[bank],
                            RP1_GPIO_SYS_RIO_REG_OE_OFFSET);
