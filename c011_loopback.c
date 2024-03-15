@@ -35,7 +35,7 @@ int test_all_byte_values(void) {
         c011_reset();
         good = true;
         timeout = false;
-        for (count=0; count < 1000000 && good && !timeout; count++) {
+        for (count=0; count < 100000 && good && !timeout; count++) {
             ret = c011_write_byte(i,200);
             if (ret == -1) {
                 printf ("write timeout\n");
@@ -228,8 +228,8 @@ int main(int argc, char *argv[])
 
     c011_clear_byte_mode();
     //test_perf();
-    test_random_byte_values();
-    //test_alternating_byte_value(0x00);
-    //test_all_byte_values();
+    //test_random_byte_values();
+    //test_alternating_byte_value(0x66);
+    test_all_byte_values();
     //test_single_byte_value(0x40);
 }
