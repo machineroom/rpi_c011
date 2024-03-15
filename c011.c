@@ -159,7 +159,7 @@ static inline void set_data_output_pins(void) {
         set_gpio_bit (BYTE_DIR, HIGH);
         gpio_commit();
 #ifdef RP1
-        // bits 9-2 output (1)
+        // bits 9-2 output (1)  // reading OE costs ~0.5Mb/sec
         uint32_t oe = rp1_gpio_sys_rio_oe_read(gpio_base, gpio_bank);
         oe |= 0x3FC;
         rp1_gpio_sys_rio_oe_set_word(gpio_base, gpio_bank, oe);

@@ -215,6 +215,7 @@ int test_perf (void) {
             double mbits = 8.0f * 2.0f;
             double per_second = (double)1000.0f/(now-start);
             printf ("%0.1f Mbits/second (total %dM bytes)\n",per_second*mbits, count/1000000);
+            c011_dump_stats("loop");
             start = now;
         }
     }
@@ -227,8 +228,8 @@ int main(int argc, char *argv[])
 
     c011_clear_byte_mode();
     //test_perf();
-    //test_random_byte_values();
-    test_alternating_byte_value(0x00);
+    test_random_byte_values();
+    //test_alternating_byte_value(0x00);
     //test_all_byte_values();
     //test_single_byte_value(0x40);
 }
