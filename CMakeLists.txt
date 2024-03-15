@@ -1,6 +1,6 @@
 PROJECT (rpi_c011_link)
 
-ADD_LIBRARY (gpio gpiolib.c gpiochip_bcm2712.c gpiochip_bcm2835.c gpiochip_rp1.c util.c)
+ADD_LIBRARY (gpio gpiolib.c gpiochip_rp1.c util.c)
 
 ADD_EXECUTABLE (boot boot.c c011.c)
 ADD_EXECUTABLE (test_gpio test_gpio.c)
