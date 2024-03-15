@@ -349,7 +349,7 @@ static uint8_t read_c011(void) {
     //sleep_ns (TCSLDrV);
     uint32_t reg = 0;
 #ifdef RP1
-    reg = rp1_gpio_sys_rio_out_read(gpio_base, gpio_bank, gpio_offset);
+    reg = rp1_gpio_sys_rio_sync_in_read (gpio_base, gpio_bank, gpio_offset);
 #else
     reg = bcm2835_peri_read_nb (gpio_lev);
 #endif

@@ -186,7 +186,7 @@ uint32_t rp1_gpio_sys_rio_out_read(volatile uint32_t *base, int bank,
     return rp1_gpio_read32(base, gpio_state.sys_rio[bank], RP1_GPIO_SYS_RIO_REG_OUT_OFFSET);
 }
 
-static uint32_t rp1_gpio_sys_rio_sync_in_read(volatile uint32_t *base, int bank,
+uint32_t rp1_gpio_sys_rio_sync_in_read(volatile uint32_t *base, int bank,
                                               int offset)
 {
     UNUSED(offset);

@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     uint8_t rx[4];
     memset(rx,0,sizeof(rx));
     uint32_t num;
-    printf ("write %ld bytes to link\n",sizeof(boot)); 
+    printf ("write %ld bytes to link\n",sizeof(boot));
     ret = c011_write_bytes (boot, sizeof(boot), 200);
     if (ret != sizeof(boot)) {
         printf ("failed to write bootstrap - ret = %d\n", ret);
