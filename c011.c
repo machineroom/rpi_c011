@@ -109,7 +109,7 @@ static inline void set_gpio_bit(uint8_t pin, uint8_t on) {
 
 static inline void gpio_commit(void) {
 #ifdef RP1
-   rp1_gpio_sys_rio_out_write(gpio_base, gpio_bank, gpio_offset, bits);
+    rp1_gpio_sys_rio_out_write(gpio_base, gpio_bank, gpio_offset, bits);
 #else
     //testing with scope shows gpio_commit takes ~150ns (rpi4 -O3)
     // bcm2835_peri_write ~75ns
@@ -135,6 +135,15 @@ static void set_control_pins(void) {
     gpio_set_fsel(OUT_INT, GPIO_FSEL_INPUT);
     gpio_set_pull(IN_INT, PULL_DOWN);
     gpio_set_pull(OUT_INT, PULL_DOWN);
+
+    gpio_set_fsel(D0, GPIO_FSEL_GPIO);
+    gpio_set_fsel(D1, GPIO_FSEL_GPIO);
+    gpio_set_fsel(D2, GPIO_FSEL_GPIO);
+    gpio_set_fsel(D3, GPIO_FSEL_GPIO);
+    gpio_set_fsel(D4, GPIO_FSEL_GPIO);
+    gpio_set_fsel(D5, GPIO_FSEL_GPIO);
+    gpio_set_fsel(D6, GPIO_FSEL_GPIO);
+    gpio_set_fsel(D7, GPIO_FSEL_GPIO);
 
 #else
     bcm2835_gpio_fsel(RS0, BCM2835_GPIO_FSEL_OUTP);
@@ -241,7 +250,7 @@ void c011_init(void) {
 #ifdef RP1
     gpiolib_set_verbose(&verbose_callback);
     int ret = gpiolib_init();
-    unsigned int gpio = D0;
+    unsigned int gpio = D0; // all GPIO bins in the same bank, so pick an arbitrary pin
     ret = gpiolib_mmap();
 
     void *priv;
@@ -271,7 +280,7 @@ void c011_reset(void) {
     gpio_commit();
     set_gpio_bit(RESET, HIGH);
     gpio_commit();
-    sleep(1);
+sleep(1);
 //    bcm2835_delayMicroseconds (5*1000);
     set_gpio_bit(RESET, LOW);
     gpio_commit();
@@ -289,7 +298,7 @@ void c011_set_byte_mode(void) {
 void c011_clear_byte_mode(void) {
     set_gpio_bit (BYTE,LOW);
     gpio_commit();
-    //The whitecross HSL takes some time to cascade
+//The whitecross HSL takes some time to cascade
 //    bcm2835_delay(1500);
     sleep(2);
 }
@@ -312,7 +321,8 @@ int c011_write_byte(uint8_t byte, uint32_t timeout) {
 #ifdef RP1
     start = get_ms();
     while (((gpio_get_level(OUT_INT)) == 0)) {
-        if (get_ms() - start >  timeout) {
+        time_t now = get_ms();
+        if (now - start >  timeout) {
             total_write_timeouts++;
             return -1;
         }
@@ -384,7 +394,8 @@ int c011_read_byte(uint8_t *byte, uint32_t timeout) {
 #ifdef RP1
         start = get_ms();
         while (((gpio_get_level(IN_INT)) == 0)) {
-            if (get_ms() - start >  timeout) {
+            uint64_t now = get_ms();
+            if (now - start >  timeout) {
                 total_read_timeouts++;
                 return -1;
             }
